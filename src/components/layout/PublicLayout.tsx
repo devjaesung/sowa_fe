@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router";
 import logoImage from "../../assets/sowa_icon.png";
+import footerLogoImage from "../../assets/sowa_ic_white.png";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `text-sm font-medium tracking-[0.02em] transition-colors ${
@@ -33,8 +34,23 @@ export default function PublicLayout() {
         <Outlet />
       </main>
 
-      <footer className="bg-footer py-7 text-center text-sm text-footer-text">
-        © 2024 SOWA INTERIOR. All rights reserved.
+      <footer className="bg-footer py-9 text-footer-text">
+        <div className="mx-auto grid w-full max-w-310 gap-6 px-6 text-sm md:grid-cols-3 md:items-start">
+          <div className="flex justify-center md:self-end md:justify-start">
+            <img src={footerLogoImage} alt="SOWA" className="h-9 w-auto" />
+          </div>
+
+          <div className="text-center md:self-end">
+            <p>© 2024 SOWA INTERIOR. All rights reserved.</p>
+          </div>
+
+          <div className="space-y-1 text-center md:text-right">
+            <p>이창훈</p>
+            <p>ech0701@naver.com</p>
+            <p>+82 10-9457-7283</p>
+            <p>서울특별시, 강남구 논현동 123-3번지, 1층</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
