@@ -17,10 +17,7 @@ function App() {
           <Route path="/inquiry" element={<InquiryPage />} />
         </Route>
 
-        <Route
-          path="/admin"
-          element={<AdminPage onError={() => {}} onOk={() => {}} />}
-        />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<Navigate replace to="/" />} />
       </Routes>
     </BrowserRouter>
