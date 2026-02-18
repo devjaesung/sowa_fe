@@ -1,23 +1,37 @@
 import { useMemo, useState } from "react";
-import ProjectCard from "../components/common/ProjectCard";
+import { useQuery } from "@tanstack/react-query";
+import { sowaApi } from "../api/sowaApi";
+import ProjectCard, { ProjectCardSkeleton } from "../components/common/ProjectCard";
 import Button from "../components/ui/Button";
-import { mockFeaturedProjects } from "../mocks/mockProjects";
-
-const categories = ["전체", "주거", "상업", "오피스"] as const;
 
 export default function PortfolioPage() {
-  const [selectedCategory, setSelectedCategory] =
-    useState<(typeof categories)[number]>("전체");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
 
-  const filteredItems = useMemo(() => {
-    if (selectedCategory === "전체") {
-      return mockFeaturedProjects;
-    }
+  const categoriesQuery = useQuery({
+    queryKey: ["public-portfolio-categories"],
+    queryFn: sowaApi.public.getCategories,
+  });
 
-    return mockFeaturedProjects.filter(
-      (item) => item.category === selectedCategory,
-    );
-  }, [selectedCategory]);
+  const portfolioQuery = useQuery({
+    queryKey: ["public-portfolio-images", selectedCategoryId],
+    queryFn: () =>
+      sowaApi.public.getPortfolioImages(
+        selectedCategoryId ? { category: selectedCategoryId } : undefined,
+      ),
+  });
+
+  const categoryTabs = useMemo(
+    () => [
+      { id: null as number | null, label: "전체" },
+      ...(categoriesQuery.data ?? []).map((category) => ({
+        id: category.id,
+        label: category.name,
+      })),
+    ],
+    [categoriesQuery.data],
+  );
+
+  const portfolioItems = portfolioQuery.data?.results ?? [];
 
   return (
     <div className="bg-surface-muted">
@@ -30,34 +44,42 @@ export default function PortfolioPage() {
       <section className="mx-auto w-full max-w-310 px-6 py-14 md:py-16">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-text-muted">
-            총 {filteredItems.length}개의 프로젝트
+            총 {portfolioItems.length}개의 프로젝트
           </p>
           <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
+            {categoryTabs.map((category) => (
               <Button
-                key={category}
+                key={category.id ?? "all"}
                 type="button"
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => setSelectedCategoryId(category.id)}
                 shape="pill"
-                variant={selectedCategory === category ? "brand" : "outline"}
+                variant={selectedCategoryId === category.id ? "brand" : "outline"}
                 className="h-10 px-5"
               >
-                {category}
+                {category.label}
               </Button>
             ))}
           </div>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {filteredItems.map((project) => (
+          {portfolioQuery.isLoading ? (
+            Array.from({ length: 6 }, (_, index) => <ProjectCardSkeleton key={`portfolio-skeleton-${index}`} />)
+          ) : null}
+          {portfolioQuery.isError ? (
+            <p className="text-sm text-red-600">프로젝트를 불러오지 못했습니다.</p>
+          ) : null}
+          {!portfolioQuery.isLoading && !portfolioQuery.isError && portfolioItems.length === 0 ? (
+            <p className="text-sm text-text-muted">등록된 프로젝트가 없습니다.</p>
+          ) : null}
+          {portfolioItems.map((project) => (
             <ProjectCard
               key={project.id}
               title={project.title}
-              category={project.category}
-              area={project.area}
-              year={project.year}
+              category={project.category?.name ?? "미분류"}
+              year={new Date(project.created_at).getFullYear().toString()}
               image={project.image}
-              summary={project.summary}
+              summary={project.description}
             />
           ))}
         </div>

@@ -14,6 +14,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
       },
+      "/media": {
+        target: process.env.VITE_API_PROXY_TARGET ?? "https://teamsowa.com",
+        changeOrigin: true,
+        secure: true,
+      },
     },
   },
 });

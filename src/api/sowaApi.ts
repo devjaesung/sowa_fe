@@ -24,6 +24,11 @@ interface PortfolioListParams {
 }
 
 const publicApi = {
+  getSettings: async () => {
+    const { data } = await apiClient.get<SiteSettings>("/api/settings/");
+    return data;
+  },
+
   getCategories: async () => {
     const { data } = await apiClient.get<Category[]>("/api/portfolio/categories/");
     return data;

@@ -1,5 +1,9 @@
 import { motion } from "motion/react";
-import ProjectCard from "../components/common/ProjectCard";
+import { useQuery } from "@tanstack/react-query";
+import { sowaApi } from "../api/sowaApi";
+import ProjectCard, {
+  ProjectCardSkeleton,
+} from "../components/common/ProjectCard";
 import Button from "../components/ui/Button";
 import ButtonLink from "../components/ui/ButtonLink";
 import Chip from "../components/ui/Chip";
@@ -9,9 +13,17 @@ import TextArea from "../components/ui/TextArea";
 import TextInput from "../components/ui/TextInput";
 import { useInquiryCreate } from "../components/inquiry/hooks/useInquiryCreate";
 
-import { mockFeaturedProjects } from "../mocks/mockProjects.js";
-
 export default function HomePage() {
+  const settingsQuery = useQuery({
+    queryKey: ["public-settings"],
+    queryFn: sowaApi.public.getSettings,
+  });
+
+  const portfolioQuery = useQuery({
+    queryKey: ["public-portfolio-home"],
+    queryFn: () => sowaApi.public.getPortfolioImages(),
+  });
+
   const homeInquiryState = useInquiryCreate({
     successMessage: "문의가 등록되었습니다.",
   });
@@ -35,6 +47,19 @@ export default function HomePage() {
     return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
   };
 
+  const rawPortfolio = portfolioQuery.data?.results ?? [];
+  const featuredSource = rawPortfolio.some((item) => item.is_featured)
+    ? rawPortfolio.filter((item) => item.is_featured)
+    : rawPortfolio;
+  const featuredProjects = featuredSource.slice(0, 6);
+  const heroTitle = settingsQuery.data?.hero_title || "당신의 공간을 특별하게";
+  const heroSubtitle =
+    settingsQuery.data?.hero_subtitle ||
+    "감각적인 레이아웃과 균형 잡힌 디테일로 당신의 라이프스타일에 맞는 공간을 제안합니다.";
+  const heroImage =
+    settingsQuery.data?.hero_image ||
+    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80";
+
   return (
     <>
       <motion.section
@@ -48,11 +73,10 @@ export default function HomePage() {
           <div>
             <Chip>Interior Design Studio</Chip>
             <h1 className="mt-8 text-5xl font-medium leading-[1.1] tracking-tight text-text-main md:text-4xl">
-              당신의 공간을 특별하게
+              {heroTitle}
             </h1>
             <p className="mt-7 max-w-105 text-base leading-relaxed text-text-muted">
-              감각적인 레이아웃과 균형 잡힌 디테일로 당신의 라이프스타일에 맞는
-              공간을 제안합니다.
+              {heroSubtitle}
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -72,7 +96,7 @@ export default function HomePage() {
 
           <div className="relative">
             <img
-              src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80"
+              src={heroImage}
               alt="SOWA hero"
               className="h-135 w-full rounded-tl-[56px] rounded-br-xl object-cover"
             />
@@ -106,14 +130,31 @@ export default function HomePage() {
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {mockFeaturedProjects.map((project) => (
+          {portfolioQuery.isLoading
+            ? Array.from({ length: 6 }, (_, index) => (
+                <ProjectCardSkeleton key={`featured-skeleton-${index}`} />
+              ))
+            : null}
+          {portfolioQuery.isError ? (
+            <p className="text-sm text-red-600">
+              프로젝트를 불러오지 못했습니다.
+            </p>
+          ) : null}
+          {!portfolioQuery.isLoading &&
+          !portfolioQuery.isError &&
+          featuredProjects.length === 0 ? (
+            <p className="text-sm text-text-muted">
+              등록된 프로젝트가 없습니다.
+            </p>
+          ) : null}
+          {featuredProjects.map((project) => (
             <ProjectCard
               key={project.id}
               title={project.title}
-              category={project.category}
-              area={project.area}
-              year={project.year}
+              category={project.category?.name ?? "미분류"}
+              year={new Date(project.created_at).getFullYear().toString()}
               image={project.image}
+              summary={project.description}
             />
           ))}
         </div>
@@ -155,12 +196,15 @@ export default function HomePage() {
           </div>
 
           <div className="rounded-2xl border border-line bg-card p-7 shadow-sm md:p-8">
-            <form className="space-y-4" onSubmit={handleSubmit(homeInquiryState.onSubmitValues)}>
+            <form
+              className="space-y-4"
+              onSubmit={handleSubmit(homeInquiryState.onSubmitValues)}
+            >
               <FieldLabel required>이름</FieldLabel>
               <TextInput
                 {...register("name")}
                 placeholder="이름을 입력해주세요."
-                className="mt-2 h-11 px-4"
+                className="h-11 px-4"
                 maxLength={10}
               />
               {errors.name ? (
@@ -178,7 +222,7 @@ export default function HomePage() {
                   })
                 }
                 placeholder="연락처를 입력해주세요."
-                className="mt-2 h-11 px-4"
+                className="h-11 px-4"
                 inputMode="numeric"
                 maxLength={13}
               />
@@ -191,7 +235,7 @@ export default function HomePage() {
                 <TextInput
                   value={watch("password")}
                   onValueChange={(value) =>
-                    setValue("password", value.replace(/\D/g, "").slice(0, 8), {
+                    setValue("password", value, {
                       shouldDirty: true,
                       shouldTouch: true,
                       shouldValidate: true,
@@ -199,12 +243,13 @@ export default function HomePage() {
                   }
                   type="password"
                   placeholder="글 조회 시 필요한 비밀번호입니다."
-                  className="mt-2 h-11 px-4"
-                  inputMode="numeric"
-                  maxLength={8}
+                  className="mt-4 h-11 px-4"
+                  maxLength={50}
                 />
                 {errors.password ? (
-                  <p className="mt-2 text-xs text-red-600">{errors.password.message}</p>
+                  <p className="mt-2 text-xs text-red-600">
+                    {errors.password.message}
+                  </p>
                 ) : null}
                 <p className="mt-2 text-xs text-text-muted">
                   문의 내용 확인 시 필요합니다.
@@ -284,14 +329,14 @@ export default function HomePage() {
               <TextInput
                 {...register("area")}
                 placeholder="예: 32평"
-                className="mt-2 h-11 px-4"
+                className="h-11 px-4"
               />
 
               <FieldLabel>입주 예상 날짜</FieldLabel>
               <TextInput
                 {...register("moveInDate")}
                 type="date"
-                className="mt-2 h-11 px-4"
+                className=" h-11 px-4"
               />
 
               <FieldLabel>원하는 공사</FieldLabel>
@@ -305,20 +350,24 @@ export default function HomePage() {
               <TextArea
                 {...register("content")}
                 placeholder="기타 요구사항을 입력해주세요."
-                className="mt-2 min-h-28 px-4 py-3"
+                className="min-h-28 px-4 py-3"
               />
 
               {homeInquiryState.submitErrorMessage ? (
-                <p className="text-sm text-red-600">{homeInquiryState.submitErrorMessage}</p>
+                <p className="text-sm text-red-600">
+                  {homeInquiryState.submitErrorMessage}
+                </p>
               ) : null}
               {homeInquiryState.submitSuccessMessage ? (
-                <p className="text-sm text-green-600">{homeInquiryState.submitSuccessMessage}</p>
+                <p className="text-sm text-green-600">
+                  {homeInquiryState.submitSuccessMessage}
+                </p>
               ) : null}
 
               <Button
                 type="submit"
                 full
-                className="mt-2 h-12 rounded-lg"
+                className=" h-12 rounded-lg"
                 disabled={homeInquiryState.isSubmitting}
               >
                 {homeInquiryState.isSubmitting ? "등록 중..." : "문의 등록"}
