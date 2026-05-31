@@ -13,8 +13,8 @@ function App() {
       <Routes>
         <Route element={<PublicLayout />}>
           <Route index element={<HomePage />} />
-          <Route path="/portfolio" element={<PortfolioPage />} />
-          <Route path="/inquiry" element={<InquiryPage />} />
+          <Route path="/works" element={<PortfolioPage />} />
+          <Route path="/contact" element={<InquiryPage />} />
         </Route>
 
         <Route path="/admin" element={<AdminPage />} />

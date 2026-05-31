@@ -81,11 +81,11 @@ export default function HomePage() {
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-3">
-              <ButtonLink to="/portfolio" shape="pill" className="h-11 px-6">
+              <ButtonLink to="/works" shape="pill" className="h-11 px-6">
                 포트폴리오 보기
               </ButtonLink>
               <ButtonLink
-                to="/inquiry"
+                to="/contact"
                 variant="outline"
                 shape="pill"
                 className="h-11 px-6"
@@ -125,7 +125,7 @@ export default function HomePage() {
               주요 프로젝트
             </h2>
           </div>
-          <ButtonLink to="/portfolio" variant="ghost">
+          <ButtonLink to="/works" variant="ghost">
             전체 보기 →
           </ButtonLink>
         </div>
@@ -162,7 +162,7 @@ export default function HomePage() {
 
         <div className="mt-11 text-center">
           <ButtonLink
-            to="/portfolio"
+            to="/works"
             variant="outline"
             shape="pill"
             className="h-11 px-7"

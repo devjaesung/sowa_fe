@@ -36,17 +36,20 @@ export default function PublicLayout() {
 
           <nav className="flex items-center gap-8 md:gap-11">
             <NavLink to="/" end className={linkClass}>
-              홈
+              HOME
             </NavLink>
-            <NavLink to="/portfolio" className={linkClass}>
-              포트폴리오
+            <NavLink to="/story" className={linkClass}>
+              STORY
             </NavLink>
-            <NavLink to="/inquiry" className={linkClass}>
-              문의하기
+            <NavLink to="/works" className={linkClass}>
+              WORKS
+            </NavLink>
+            <NavLink to="/contact" className={linkClass}>
+              CONTACT
             </NavLink>
             {adminSessionQuery.isSuccess ? (
               <NavLink to="/admin" className={linkClass}>
-                관리자
+                ADMIN
               </NavLink>
             ) : null}
           </nav>
