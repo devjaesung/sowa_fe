@@ -14,8 +14,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { HiOutlineDotsVertical } from "react-icons/hi";
-import type { ChangeEvent, FormEvent } from "react";
-import type { Category, PortfolioImage } from "../../api/types";
+import { useMemo, type ChangeEvent, type FormEvent } from "react";
+import type { Category, Portfolio, PortfolioImage } from "../../api/types";
 import Button from "../ui/Button";
 import FieldLabel from "../ui/FieldLabel";
 import Select from "../ui/Select";
@@ -25,7 +25,7 @@ import type { PortfolioEditorMode, PortfolioFormState } from "./types";
 import { resolveAssetUrl } from "../../shared/assetUrl";
 
 interface AdminPortfolioTabProps {
-  portfolioList: PortfolioImage[];
+  portfolioList: Portfolio[];
   categoryList: Category[];
   portfolioEditorMode: PortfolioEditorMode;
   portfolioForm: PortfolioFormState;
@@ -34,9 +34,10 @@ interface AdminPortfolioTabProps {
   onChangeForm: (next: PortfolioFormState) => void;
   onSubmitCreate: (event: FormEvent<HTMLFormElement>) => void;
   onSubmitUpdate: () => void;
-  onEdit: (item: PortfolioImage) => void;
+  onEdit: (item: Portfolio) => void;
   onDelete: (id: number) => void;
-  onReorder: (nextList: PortfolioImage[]) => void;
+  onDeleteImage: (imageId: number) => void;
+  onReorder: (nextList: Portfolio[]) => void;
 }
 
 export default function AdminPortfolioTab({
@@ -51,29 +52,42 @@ export default function AdminPortfolioTab({
   onSubmitUpdate,
   onEdit,
   onDelete,
+  onDeleteImage,
   onReorder,
 }: AdminPortfolioTabProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
 
+  // 카테고리 옵션: 대분류 > 소분류 계층 표시
+  const categoryOptions = useMemo(() => {
+    const parents = categoryList.filter((c) => c.parent == null);
+    const children = categoryList.filter((c) => c.parent != null);
+    const result: { label: string; value: string }[] = [];
+
+    for (const parent of parents) {
+      result.push({ label: parent.name, value: String(parent.id) });
+      children
+        .filter((c) => c.parent === parent.id)
+        .forEach((child) =>
+          result.push({ label: `  └ ${child.name}`, value: String(child.id) }),
+        );
+    }
+    // 부모가 없는 orphan 소분류
+    children
+      .filter((c) => !parents.some((p) => p.id === c.parent))
+      .forEach((c) => result.push({ label: c.name, value: String(c.id) }));
+
+    return result;
+  }, [categoryList]);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    if (!over || active.id === over.id) return;
 
-    if (!over || active.id === over.id) {
-      return;
-    }
-
-    const oldIndex = portfolioList.findIndex(
-      (item) => item.id === Number(active.id),
-    );
-    const newIndex = portfolioList.findIndex(
-      (item) => item.id === Number(over.id),
-    );
-
-    if (oldIndex < 0 || newIndex < 0) {
-      return;
-    }
+    const oldIndex = portfolioList.findIndex((item) => item.id === Number(active.id));
+    const newIndex = portfolioList.findIndex((item) => item.id === Number(over.id));
+    if (oldIndex < 0 || newIndex < 0) return;
 
     onReorder(arrayMove(portfolioList, oldIndex, newIndex));
   };
@@ -91,120 +105,135 @@ export default function AdminPortfolioTab({
 
       {portfolioEditorMode ? (
         <form
-          className="grid gap-3 rounded-xl border border-line bg-card-soft p-4 md:grid-cols-2"
-          onSubmit={(event) => {
+          className="grid gap-4 rounded-xl border border-line bg-card-soft p-4 md:grid-cols-2"
+          onSubmit={(e) => {
             if (portfolioEditorMode === "create") {
-              onSubmitCreate(event);
-              return;
+              onSubmitCreate(e);
+            } else {
+              e.preventDefault();
+              onSubmitUpdate();
             }
-
-            event.preventDefault();
-            onSubmitUpdate();
           }}
         >
+          {/* 카테고리 */}
           <div>
             <FieldLabel>카테고리</FieldLabel>
             <Select
               className="mt-2"
               value={portfolioForm.category_id}
               placeholder="카테고리 선택"
-              options={categoryList.map((category) => ({
-                label: category.name,
-                value: String(category.id),
-              }))}
-              onChange={(value) =>
-                onChangeForm({ ...portfolioForm, category_id: value })
-              }
+              options={categoryOptions}
+              onChange={(value) => onChangeForm({ ...portfolioForm, category_id: value })}
             />
           </div>
+
+          {/* 제목 */}
           <div>
             <FieldLabel required>타이틀</FieldLabel>
             <TextInput
               className="mt-2"
               value={portfolioForm.title}
-              onChange={(event) =>
-                onChangeForm({ ...portfolioForm, title: event.target.value })
-              }
+              onChange={(e) => onChangeForm({ ...portfolioForm, title: e.target.value })}
             />
           </div>
+
+          {/* 순서 */}
           <div>
             <FieldLabel>순서</FieldLabel>
             <TextInput
               className="mt-2"
               value={portfolioForm.order}
-              onChange={(event) =>
-                onChangeForm({ ...portfolioForm, order: event.target.value })
-              }
+              onChange={(e) => onChangeForm({ ...portfolioForm, order: e.target.value })}
             />
           </div>
+
+          {/* 메인 노출 */}
+          <label className="flex items-end gap-2 pb-2 text-sm text-text-main">
+            <input
+              type="checkbox"
+              checked={portfolioForm.is_featured}
+              onChange={(e) =>
+                onChangeForm({ ...portfolioForm, is_featured: e.target.checked })
+              }
+            />
+            메인 노출
+          </label>
+
+          {/* 설명 */}
           <div className="md:col-span-2">
             <FieldLabel>설명</FieldLabel>
             <TextArea
               className="mt-2 min-h-24"
               value={portfolioForm.description}
-              onChange={(event) =>
-                onChangeForm({
-                  ...portfolioForm,
-                  description: event.target.value,
-                })
-              }
+              onChange={(e) => onChangeForm({ ...portfolioForm, description: e.target.value })}
             />
           </div>
-          <div>
+
+          {/* 편집 모드: 기존 이미지 목록 */}
+          {portfolioEditorMode === "edit" && portfolioForm.existingImages.length > 0 && (
+            <div className="md:col-span-2">
+              <FieldLabel>현재 이미지</FieldLabel>
+              <div className="mt-2 flex flex-wrap gap-3">
+                {portfolioForm.existingImages.map((img) => (
+                  <ExistingImageThumb
+                    key={img.id}
+                    image={img}
+                    onDelete={() => onDeleteImage(img.id)}
+                  />
+                ))}
+              </div>
+              <p className="mt-1 text-xs text-text-muted">
+                첫 번째 이미지가 썸네일로 사용됩니다.
+              </p>
+            </div>
+          )}
+
+          {/* 이미지 업로드 */}
+          <div className="md:col-span-2">
             <FieldLabel>
-              {portfolioEditorMode === "create"
-                ? "이미지 파일 (필수)"
-                : "이미지 파일 (선택)"}
+              이미지 파일 추가{" "}
+              <span className="font-normal text-text-subtle">
+                (여러 장 선택 가능
+                {portfolioEditorMode === "create" ? ", 첫 번째가 썸네일" : ""})
+              </span>
             </FieldLabel>
             <TextInput
               className="mt-2"
               type="file"
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                onChangeForm({
-                  ...portfolioForm,
-                  image: event.target.files?.[0] ?? null,
-                })
-              }
+              accept="image/*"
+              multiple
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                const files = Array.from(e.target.files ?? []);
+                onChangeForm({ ...portfolioForm, images: files });
+              }}
             />
+            {portfolioForm.images.length > 0 && (
+              <p className="mt-1 text-xs text-text-muted">
+                {portfolioForm.images.length}장 선택됨:{" "}
+                {portfolioForm.images.map((f) => f.name).join(", ")}
+              </p>
+            )}
           </div>
-          <label className="flex items-end gap-2 pb-2 text-sm text-text-main">
-            <input
-              type="checkbox"
-              checked={portfolioForm.is_featured}
-              onChange={(event) =>
-                onChangeForm({
-                  ...portfolioForm,
-                  is_featured: event.target.checked,
-                })
-              }
-            />
-            메인 노출
-          </label>
+
+          {/* 액션 버튼 */}
           <div className="flex flex-wrap gap-2 md:col-span-2">
             <Button type="submit" className="h-10 px-4">
               {portfolioEditorMode === "create" ? "생성" : "수정 저장"}
             </Button>
-            {portfolioEditorMode === "edit" ? (
+            {portfolioEditorMode === "edit" && (
               <Button
                 type="button"
                 variant="ghost"
-                className="h-10 px-4"
+                className="h-10 px-4 text-rose-700 hover:text-rose-800"
                 onClick={() => {
-                  if (!portfolioForm.id) {
-                    return;
-                  }
+                  if (!portfolioForm.id) return;
                   onDelete(Number(portfolioForm.id));
                 }}
               >
-                삭제
+                작품 삭제
               </Button>
-            ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              className="h-10 px-4"
-              onClick={onCloseEditor}
-            >
+            )}
+            <Button type="button" variant="outline" className="h-10 px-4" onClick={onCloseEditor}>
               닫기
             </Button>
           </div>
@@ -232,11 +261,38 @@ export default function AdminPortfolioTab({
           </SortableContext>
         </DndContext>
         {portfolioList.length === 0 ? (
-          <p className="text-sm text-text-muted">
-            등록된 포트폴리오가 없습니다.
-          </p>
+          <p className="text-sm text-text-muted">등록된 포트폴리오가 없습니다.</p>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function ExistingImageThumb({
+  image,
+  onDelete,
+}: {
+  image: PortfolioImage;
+  onDelete: () => void;
+}) {
+  const src = resolveAssetUrl(image.image);
+  return (
+    <div className="group relative h-20 w-20 overflow-hidden rounded-lg border border-line">
+      {src ? (
+        <img src={src} alt="" className="h-full w-full object-cover" />
+      ) : (
+        <div className="flex h-full items-center justify-center bg-surface text-xs text-text-subtle">
+          없음
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={onDelete}
+        className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition group-hover:opacity-100"
+        aria-label="이미지 삭제"
+      >
+        <span className="text-xl font-bold text-white">×</span>
+      </button>
     </div>
   );
 }
@@ -246,19 +302,13 @@ function SortablePortfolioCard({
   onEdit,
   onDelete,
 }: {
-  item: PortfolioImage;
+  item: Portfolio;
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: item.id });
-  const previewImageSrc = resolveAssetUrl(item.image);
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: item.id });
+  const previewImageSrc = resolveAssetUrl(item.thumbnail);
 
   return (
     <article
@@ -280,21 +330,19 @@ function SortablePortfolioCard({
 
       <div className="aspect-4/3 bg-surface">
         {previewImageSrc ? (
-          <img
-            src={previewImageSrc}
-            alt={item.title}
-            className="h-full w-full object-cover"
-          />
+          <img src={previewImageSrc} alt={item.title} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-text-subtle">
             이미지 없음
           </div>
         )}
       </div>
+
       <div className="space-y-1 px-4 py-3">
         <p className="text-sm font-medium text-text-main">{item.title}</p>
         <p className="text-xs text-text-muted">
-          #{item.id} | {item.category?.name ?? "-"} | 순서 {item.order ?? 0}
+          #{item.id} | {item.category?.name ?? "-"} | 이미지 {item.images.length}장 | 순서{" "}
+          {item.order ?? 0}
         </p>
       </div>
 

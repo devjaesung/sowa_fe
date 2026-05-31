@@ -6,7 +6,7 @@ import type {
   DashboardStats,
   InquiryDetail,
   InquiryListItem,
-  PortfolioImage,
+  Portfolio,
   SiteSettings,
 } from "../../../api/types";
 import type {
@@ -58,7 +58,8 @@ const createEmptyPortfolioForm = (): PortfolioFormState => ({
   description: "",
   is_featured: false,
   order: "0",
-  image: null,
+  images: [],
+  existingImages: [],
 });
 
 const createEmptySettingsForm = (): SettingsFormState => ({
@@ -80,7 +81,7 @@ export function useAdminPageModel() {
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [categoryEditorMode, setCategoryEditorMode] = useState<CategoryEditorMode>(null);
   const [categoryEditId, setCategoryEditId] = useState<number | null>(null);
-  const [categoryForm, setCategoryForm] = useState<CategoryFormState>({ name: "", order: "0" });
+  const [categoryForm, setCategoryForm] = useState<CategoryFormState>({ name: "", order: "0", parent: "" });
   const [portfolioEditorMode, setPortfolioEditorMode] = useState<PortfolioEditorMode>(null);
   const [portfolioForm, setPortfolioForm] = useState<PortfolioFormState>(createEmptyPortfolioForm);
   const [selectedAdminInquiryId, setSelectedAdminInquiryId] = useState("");
@@ -176,20 +177,20 @@ export function useAdminPageModel() {
       showSuccess("카테고리 생성 완료");
       setCategoryEditorMode(null);
       setCategoryEditId(null);
-      setCategoryForm({ name: "", order: "0" });
+      setCategoryForm({ name: "", order: "0", parent: "" });
       categoryQuery.refetch();
     },
     onError: showError,
   });
 
   const updateCategoryMutation = useMutation({
-    mutationFn: ({ id, name, order }: { id: number; name: string; order?: number }) =>
-      sowaApi.admin.updateCategory(id, { name, order }),
+    mutationFn: ({ id, name, order, parent }: { id: number; name: string; order?: number; parent?: number | null }) =>
+      sowaApi.admin.updateCategory(id, { name, order, parent }),
     onSuccess: () => {
       showSuccess("카테고리 수정 완료");
       setCategoryEditorMode(null);
       setCategoryEditId(null);
-      setCategoryForm({ name: "", order: "0" });
+      setCategoryForm({ name: "", order: "0", parent: "" });
       categoryQuery.refetch();
     },
     onError: showError,
@@ -211,6 +212,7 @@ export function useAdminPageModel() {
           sowaApi.admin.updateCategory(item.id, {
             name: item.name,
             order: index,
+            parent: item.parent ?? null,
           }),
         ),
       );
@@ -256,8 +258,17 @@ export function useAdminPageModel() {
     onError: showError,
   });
 
+  const deletePortfolioImageMutation = useMutation({
+    mutationFn: sowaApi.admin.deletePortfolioImage,
+    onSuccess: () => {
+      showSuccess("이미지 삭제 완료");
+      portfolioQuery.refetch();
+    },
+    onError: showError,
+  });
+
   const reorderPortfolioMutation = useMutation({
-    mutationFn: async (nextList: PortfolioImage[]) => {
+    mutationFn: async (nextList: Portfolio[]) => {
       await Promise.all(
         nextList.map((item, index) =>
           sowaApi.admin.updatePortfolio(item.id, {
@@ -323,7 +334,7 @@ export function useAdminPageModel() {
   });
 
   const categoryList = toList<Category>(categoryQuery.data);
-  const portfolioList = toList<PortfolioImage>(portfolioQuery.data);
+  const portfolioList = toList<Portfolio>(portfolioQuery.data);
   const inquiryList = toList<InquiryListItem>(adminInquiryQuery.data);
 
   const orderedCategoryList = useMemo(() => sortByOrder(categoryList), [categoryList]);
@@ -360,6 +371,7 @@ export function useAdminPageModel() {
     }
 
     const orderValue = Number(categoryForm.order || "0");
+    const parentValue = categoryForm.parent ? Number(categoryForm.parent) : null;
 
     if (categoryEditorMode === "edit") {
       if (!categoryEditId) {
@@ -371,25 +383,26 @@ export function useAdminPageModel() {
         id: categoryEditId,
         name: categoryForm.name.trim(),
         order: orderValue,
+        parent: parentValue,
       });
       return;
     }
 
-    createCategoryMutation.mutate({ name: categoryForm.name.trim(), order: orderValue });
+    createCategoryMutation.mutate({ name: categoryForm.name.trim(), order: orderValue, parent: parentValue });
   };
 
   const submitPortfolioCreate = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!portfolioForm.title || !portfolioForm.image) {
-      setNotice({ tone: "error", message: "포트폴리오 생성은 title/image가 필수입니다." });
+    if (!portfolioForm.title) {
+      setNotice({ tone: "error", message: "포트폴리오 생성은 제목이 필수입니다." });
       return;
     }
 
     createPortfolioMutation.mutate({
       category_id: portfolioForm.category_id ? Number(portfolioForm.category_id) : null,
       title: portfolioForm.title,
-      image: portfolioForm.image,
+      images: portfolioForm.images.length > 0 ? portfolioForm.images : undefined,
       description: portfolioForm.description,
       is_featured: portfolioForm.is_featured,
       order: Number(portfolioForm.order || "0"),
@@ -407,7 +420,7 @@ export function useAdminPageModel() {
       payload: {
         category_id: portfolioForm.category_id ? Number(portfolioForm.category_id) : null,
         title: portfolioForm.title,
-        image: portfolioForm.image ?? undefined,
+        images: portfolioForm.images.length > 0 ? portfolioForm.images : undefined,
         description: portfolioForm.description,
         is_featured: portfolioForm.is_featured,
         order: Number(portfolioForm.order || "0"),
@@ -477,6 +490,7 @@ export function useAdminPageModel() {
     deleteCategoryMutation,
     reorderCategoryMutation,
     deletePortfolioMutation,
+    deletePortfolioImageMutation,
     reorderPortfolioMutation,
     deleteInquiryMutation,
     addCommentMutation,

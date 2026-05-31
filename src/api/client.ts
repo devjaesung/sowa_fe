@@ -20,6 +20,17 @@ export const toFormData = (payload: object): FormData => {
       return;
     }
 
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        if (item instanceof File) {
+          formData.append(key, item);
+        } else {
+          formData.append(key, String(item));
+        }
+      });
+      return;
+    }
+
     formData.append(key, String(value));
   });
 

@@ -57,6 +57,7 @@ export default function AdminPage() {
     deleteCategoryMutation,
     reorderCategoryMutation,
     deletePortfolioMutation,
+    deletePortfolioImageMutation,
     reorderPortfolioMutation,
     deleteInquiryMutation,
     addCommentMutation,
@@ -165,19 +166,28 @@ export default function AdminPage() {
               onOpenCreate={() => {
                 setCategoryEditorMode("create");
                 setCategoryEditId(null);
-                setCategoryForm({ name: "", order: "0" });
+                setCategoryForm({ name: "", order: "0", parent: "" });
+              }}
+              onOpenCreateChild={(parentId) => {
+                setCategoryEditorMode("create");
+                setCategoryEditId(null);
+                setCategoryForm({ name: "", order: "0", parent: String(parentId) });
               }}
               onCloseEditor={() => {
                 setCategoryEditorMode(null);
                 setCategoryEditId(null);
-                setCategoryForm({ name: "", order: "0" });
+                setCategoryForm({ name: "", order: "0", parent: "" });
               }}
               onChangeForm={setCategoryForm}
               onSubmit={submitCategory}
               onEdit={(category) => {
                 setCategoryEditorMode("edit");
                 setCategoryEditId(category.id);
-                setCategoryForm({ name: category.name, order: String(category.order ?? 0) });
+                setCategoryForm({
+                  name: category.name,
+                  order: String(category.order ?? 0),
+                  parent: category.parent ? String(category.parent) : "",
+                });
               }}
               onDelete={(id) => deleteCategoryMutation.mutate(id)}
               onReorder={(nextList) => reorderCategoryMutation.mutate(nextList)}
@@ -210,10 +220,18 @@ export default function AdminPage() {
                   description: item.description ?? "",
                   is_featured: Boolean(item.is_featured),
                   order: String(item.order ?? 0),
-                  image: null,
+                  images: [],
+                  existingImages: item.images,
                 });
               }}
               onDelete={(id) => deletePortfolioMutation.mutate(id)}
+              onDeleteImage={(imageId) => {
+                deletePortfolioImageMutation.mutate(imageId);
+                setPortfolioForm((prev) => ({
+                  ...prev,
+                  existingImages: prev.existingImages.filter((img) => img.id !== imageId),
+                }));
+              }}
               onReorder={(nextList) => reorderPortfolioMutation.mutate(nextList)}
             />
           ) : null}

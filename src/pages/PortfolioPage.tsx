@@ -5,33 +5,44 @@ import ProjectCard, { ProjectCardSkeleton } from "../components/common/ProjectCa
 import Button from "../components/ui/Button";
 
 export default function PortfolioPage() {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [activeParentId, setActiveParentId] = useState<number | null>(null);
+  const [activeChildId, setActiveChildId] = useState<number | null>(null);
 
   const categoriesQuery = useQuery({
-    queryKey: ["public-portfolio-categories"],
-    queryFn: sowaApi.public.getCategories,
+    queryKey: ["public-portfolio-categories-tree"],
+    queryFn: () => sowaApi.public.getCategories({ tree: true }),
   });
 
-  const portfolioQuery = useQuery({
-    queryKey: ["public-portfolio-images", selectedCategoryId],
-    queryFn: () =>
-      sowaApi.public.getPortfolioImages(
-        selectedCategoryId ? { category: selectedCategoryId } : undefined,
-      ),
-  });
-
-  const categoryTabs = useMemo(
-    () => [
-      { id: null as number | null, label: "전체" },
-      ...(categoriesQuery.data ?? []).map((category) => ({
-        id: category.id,
-        label: category.name,
-      })),
-    ],
+  // 대분류 목록 (tree 응답의 최상위 항목들)
+  const parentCategories = useMemo(
+    () => categoriesQuery.data?.filter((c) => c.parent == null) ?? [],
     [categoriesQuery.data],
   );
 
-  const portfolioItems = portfolioQuery.data?.results ?? [];
+  // 현재 선택된 대분류의 소분류 목록
+  const childCategories = useMemo(() => {
+    if (activeParentId === null) return [];
+    const parent = parentCategories.find((c) => c.id === activeParentId);
+    return parent?.children ?? [];
+  }, [activeParentId, parentCategories]);
+
+  // API에 실제로 전달할 category id
+  const effectiveCategoryId = activeChildId ?? activeParentId ?? undefined;
+
+  const worksQuery = useQuery({
+    queryKey: ["public-works", activeParentId, activeChildId],
+    queryFn: () =>
+      sowaApi.public.getWorks(
+        effectiveCategoryId ? { category: effectiveCategoryId } : undefined,
+      ),
+  });
+
+  const works = worksQuery.data?.results ?? [];
+
+  const handleParentClick = (id: number | null) => {
+    setActiveParentId(id);
+    setActiveChildId(null); // 대분류 바꾸면 소분류 초기화
+  };
 
   return (
     <div className="bg-surface-muted">
@@ -42,44 +53,84 @@ export default function PortfolioPage() {
       </section>
 
       <section className="mx-auto w-full max-w-310 px-6 py-14 md:py-16">
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-text-muted">
-            총 {portfolioItems.length}개의 프로젝트
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {categoryTabs.map((category) => (
+        {/* 대분류 필터 */}
+        <div className="mb-3 flex flex-wrap gap-2">
+          <Button
+            type="button"
+            shape="pill"
+            variant={activeParentId === null ? "brand" : "outline"}
+            className="h-10 px-5"
+            onClick={() => handleParentClick(null)}
+          >
+            전체
+          </Button>
+          {parentCategories.map((cat) => (
+            <Button
+              key={cat.id}
+              type="button"
+              shape="pill"
+              variant={activeParentId === cat.id ? "brand" : "outline"}
+              className="h-10 px-5"
+              onClick={() => handleParentClick(cat.id)}
+            >
+              {cat.name}
+            </Button>
+          ))}
+        </div>
+
+        {/* 소분류 필터 — 대분류 선택 시에만 표시 */}
+        {childCategories.length > 0 && (
+          <div className="mb-8 flex flex-wrap gap-2 border-l-2 border-accent pl-4">
+            <Button
+              type="button"
+              shape="pill"
+              variant={activeChildId === null ? "brand" : "outline"}
+              className="h-9 px-4 text-sm"
+              onClick={() => setActiveChildId(null)}
+            >
+              전체
+            </Button>
+            {childCategories.map((cat) => (
               <Button
-                key={category.id ?? "all"}
+                key={cat.id}
                 type="button"
-                onClick={() => setSelectedCategoryId(category.id)}
                 shape="pill"
-                variant={selectedCategoryId === category.id ? "brand" : "outline"}
-                className="h-10 px-5"
+                variant={activeChildId === cat.id ? "brand" : "outline"}
+                className="h-9 px-4 text-sm"
+                onClick={() => setActiveChildId(cat.id)}
               >
-                {category.label}
+                {cat.name}
               </Button>
             ))}
           </div>
-        </div>
+        )}
+
+        {childCategories.length === 0 && <div className="mb-8" />}
+
+        <p className="mb-6 text-sm text-text-muted">
+          총 {works.length}개의 프로젝트
+        </p>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {portfolioQuery.isLoading ? (
-            Array.from({ length: 6 }, (_, index) => <ProjectCardSkeleton key={`portfolio-skeleton-${index}`} />)
-          ) : null}
-          {portfolioQuery.isError ? (
+          {worksQuery.isLoading
+            ? Array.from({ length: 6 }, (_, i) => (
+                <ProjectCardSkeleton key={`skeleton-${i}`} />
+              ))
+            : null}
+          {worksQuery.isError ? (
             <p className="text-sm text-red-600">프로젝트를 불러오지 못했습니다.</p>
           ) : null}
-          {!portfolioQuery.isLoading && !portfolioQuery.isError && portfolioItems.length === 0 ? (
+          {!worksQuery.isLoading && !worksQuery.isError && works.length === 0 ? (
             <p className="text-sm text-text-muted">등록된 프로젝트가 없습니다.</p>
           ) : null}
-          {portfolioItems.map((project) => (
+          {works.map((work) => (
             <ProjectCard
-              key={project.id}
-              title={project.title}
-              category={project.category?.name ?? "미분류"}
-              year={new Date(project.created_at).getFullYear().toString()}
-              image={project.image}
-              summary={project.description}
+              key={work.id}
+              title={work.title}
+              category={work.category?.name ?? "미분류"}
+              year={new Date(work.created_at).getFullYear().toString()}
+              image={work.thumbnail}
+              summary={work.description}
             />
           ))}
         </div>

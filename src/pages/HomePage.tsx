@@ -21,8 +21,8 @@ export default function HomePage() {
   });
 
   const portfolioQuery = useQuery({
-    queryKey: ["public-portfolio-home"],
-    queryFn: () => sowaApi.public.getPortfolioImages(),
+    queryKey: ["public-works-home"],
+    queryFn: () => sowaApi.public.getWorks(),
   });
 
   const homeInquiryState = useInquiryCreate({
@@ -154,7 +154,7 @@ export default function HomePage() {
               title={project.title}
               category={project.category?.name ?? "미분류"}
               year={new Date(project.created_at).getFullYear().toString()}
-              image={project.image}
+              image={project.thumbnail}
               summary={project.description}
             />
           ))}

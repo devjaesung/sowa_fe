@@ -1,20 +1,114 @@
 export type Age = "20" | "30" | "40" | "";
 export type InteriorType = "residential" | "commercial" | "";
+export type RoleEnum = "director" | "manager" | "assistant" | "staff";
 
 export interface MessageResponse {
   detail: string;
 }
 
+// ─── Category ───────────────────────────────────────────────────────────────
+
 export interface Category {
   id: number;
   name: string;
   order?: number;
+  parent?: number | null;
+  children?: Category[]; // ?tree=true 로 요청 시 포함
 }
 
 export interface CategoryRequest {
   name: string;
   order?: number;
+  parent?: number | null; // null = 대분류, number = 소분류
 }
+
+// ─── Portfolio ──────────────────────────────────────────────────────────────
+
+// 작품에 속한 이미지 한 장
+export interface PortfolioImage {
+  id: number;
+  image: string;
+  order?: number;
+  created_at: string;
+}
+
+// 이미지 순서 수정용 request
+export interface PortfolioImageRequest {
+  image?: File;
+  order?: number;
+}
+
+// 작품 (이미지 N장 포함)
+export interface Portfolio {
+  id: number;
+  category: Category;
+  title: string;
+  description?: string;
+  is_featured?: boolean;
+  order?: number;
+  created_at: string;
+  thumbnail: string; // 첫 번째 이미지 URL
+  images: PortfolioImage[];
+}
+
+export interface PortfolioCreateRequest {
+  title: string;
+  description?: string;
+  category_id?: number | null;
+  is_featured?: boolean;
+  order?: number;
+  images?: File[];
+}
+
+export interface PortfolioUpdateRequest {
+  title?: string;
+  description?: string;
+  category_id?: number | null;
+  is_featured?: boolean;
+  order?: number;
+  images?: File[]; // 기존 이미지 유지, 새 파일은 추가됨
+}
+
+export interface PortfolioImagesAddRequest {
+  images: File[];
+}
+
+// ─── Story ──────────────────────────────────────────────────────────────────
+
+export interface CompanyHistory {
+  id: number;
+  year: string;
+  content: string;
+  order?: number;
+}
+
+export interface CompanyHistoryRequest {
+  year: string;
+  content: string;
+  order?: number;
+}
+
+export interface TeamMember {
+  id: number;
+  role: RoleEnum;
+  role_display: string; // 소장 / 팀장 / 대리 / 사원
+  name: string;
+  title?: string; // 자격 (예: 건축사)
+  education?: string;
+  career?: string;
+  order?: number;
+}
+
+export interface TeamMemberRequest {
+  role: RoleEnum;
+  name: string;
+  title?: string;
+  education?: string;
+  career?: string;
+  order?: number;
+}
+
+// ─── Inquiry ────────────────────────────────────────────────────────────────
 
 export interface Comment {
   id: number;
@@ -60,39 +154,7 @@ export interface InquiryPasswordRequest {
   password: string;
 }
 
-export interface PortfolioImage {
-  id: number;
-  category: Category;
-  title: string;
-  image: string;
-  description?: string;
-  is_featured?: boolean;
-  order?: number;
-  created_at: string;
-}
-
-export interface PortfolioImageRequest {
-  category_id?: number | null;
-  title: string;
-  image?: File;
-  description?: string;
-  is_featured?: boolean;
-  order?: number;
-}
-
-export interface PaginatedResponse<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
-}
-
-export interface DashboardStats {
-  total_inquiries: number;
-  pending_inquiries: number;
-  replied_inquiries: number;
-  total_portfolio: number;
-}
+// ─── Site Settings ──────────────────────────────────────────────────────────
 
 export interface SiteSettings {
   id: number;
@@ -110,6 +172,22 @@ export interface SiteSettingsRequest {
   hero_image?: File | null;
   hero_title?: string;
   hero_subtitle?: string;
+}
+
+// ─── Misc ────────────────────────────────────────────────────────────────────
+
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+export interface DashboardStats {
+  total_inquiries: number;
+  pending_inquiries: number;
+  replied_inquiries: number;
+  total_portfolio: number;
 }
 
 export interface LoginRequest {
