@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import Skeleton from "../ui/Skeleton";
 import { resolveAssetUrl } from "../../shared/assetUrl";
 
@@ -8,14 +9,15 @@ interface ProjectCardProps {
   year?: string;
   image: string;
   summary?: string;
+  to?: string;
 }
 
-export default function ProjectCard({ title, category, area, year, image, summary }: ProjectCardProps) {
+export default function ProjectCard({ title, category, area, year, image, summary, to }: ProjectCardProps) {
   const imageSrc = resolveAssetUrl(image);
 
-  return (
-    <article className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
-      <img src={imageSrc} alt={title} className="h-52 w-full object-cover" />
+  const inner = (
+    <>
+      <img src={imageSrc} alt={title} className="h-52 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
       <div className="p-5">
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold tracking-[0.08em] text-text-muted">{category}</p>
@@ -25,6 +27,20 @@ export default function ProjectCard({ title, category, area, year, image, summar
         {summary ? <p className="mt-2 text-sm leading-relaxed text-text-muted">{summary}</p> : null}
         {area ? <p className="mt-4 text-sm text-text-muted">{area}</p> : null}
       </div>
+    </>
+  );
+
+  if (to) {
+    return (
+      <Link to={to} className="group block overflow-hidden rounded-2xl border border-line bg-card shadow-sm transition-shadow hover:shadow-md">
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <article className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
+      {inner}
     </article>
   );
 }

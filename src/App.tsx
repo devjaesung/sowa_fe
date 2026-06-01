@@ -4,6 +4,7 @@ import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/HomePage";
 import InquiryPage from "./pages/InquiryPage";
 import PortfolioPage from "./pages/PortfolioPage";
+import PortfolioDetailPage from "./pages/PortfolioDetailPage";
 import StoryPage from "./pages/StoryPage";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -16,6 +17,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="/story" element={<StoryPage />} />
           <Route path="/works" element={<PortfolioPage />} />
+          <Route path="/works/:id" element={<PortfolioDetailPage />} />
           <Route path="/contact" element={<InquiryPage />} />
         </Route>
 

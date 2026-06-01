@@ -131,6 +131,7 @@ export default function PortfolioPage() {
               year={new Date(work.created_at).getFullYear().toString()}
               image={work.thumbnail}
               summary={work.description}
+              to={`/works/${work.id}`}
             />
           ))}
         </div>
