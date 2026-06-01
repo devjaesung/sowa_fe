@@ -59,6 +59,7 @@ const isStats = (value: unknown): value is DashboardStats => {
 
 const createEmptyPortfolioForm = (): PortfolioFormState => ({
   id: "",
+  parent_category_id: "",
   category_id: "",
   title: "",
   description: "",

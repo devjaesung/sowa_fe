@@ -235,9 +235,15 @@ export default function AdminPage() {
               onSubmitUpdate={submitPortfolioUpdate}
               onEdit={(item) => {
                 setPortfolioEditorMode("edit");
+                const cat = item.category;
+                // 소분류(parent 있음): parent_category_id=부모, category_id=본인
+                // 대분류(parent 없음): parent_category_id=본인, category_id=""
+                const parentCatId = cat?.parent != null ? String(cat.parent) : (cat?.id ? String(cat.id) : "");
+                const subCatId = cat?.parent != null ? String(cat.id) : "";
                 setPortfolioForm({
                   id: String(item.id),
-                  category_id: item.category?.id ? String(item.category.id) : "",
+                  parent_category_id: parentCatId,
+                  category_id: subCatId,
                   title: item.title,
                   description: item.description ?? "",
                   is_featured: Boolean(item.is_featured),

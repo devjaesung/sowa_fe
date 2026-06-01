@@ -59,27 +59,17 @@ export default function AdminPortfolioTab({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
 
-  // 카테고리 옵션: 대분류 > 소분류 계층 표시
-  const categoryOptions = useMemo(() => {
-    const parents = categoryList.filter((c) => c.parent == null);
-    const children = categoryList.filter((c) => c.parent != null);
-    const result: { label: string; value: string }[] = [];
+  const parentCategoryOptions = useMemo(
+    () => categoryList.filter((c) => c.parent == null).map((c) => ({ label: c.name, value: String(c.id) })),
+    [categoryList],
+  );
 
-    for (const parent of parents) {
-      result.push({ label: parent.name, value: String(parent.id) });
-      children
-        .filter((c) => c.parent === parent.id)
-        .forEach((child) =>
-          result.push({ label: `  └ ${child.name}`, value: String(child.id) }),
-        );
-    }
-    // 부모가 없는 orphan 소분류
-    children
-      .filter((c) => !parents.some((p) => p.id === c.parent))
-      .forEach((c) => result.push({ label: c.name, value: String(c.id) }));
-
-    return result;
-  }, [categoryList]);
+  const subCategoryOptions = useMemo(() => {
+    if (!portfolioForm.parent_category_id) return [];
+    return categoryList
+      .filter((c) => c.parent === Number(portfolioForm.parent_category_id))
+      .map((c) => ({ label: c.name, value: String(c.id) }));
+  }, [categoryList, portfolioForm.parent_category_id]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -115,14 +105,28 @@ export default function AdminPortfolioTab({
             }
           }}
         >
-          {/* 카테고리 */}
+          {/* 대분류 */}
           <div>
-            <FieldLabel>카테고리</FieldLabel>
+            <FieldLabel>대분류</FieldLabel>
+            <Select
+              className="mt-2"
+              value={portfolioForm.parent_category_id}
+              placeholder="대분류 선택"
+              options={parentCategoryOptions}
+              onChange={(value) =>
+                onChangeForm({ ...portfolioForm, parent_category_id: value, category_id: "" })
+              }
+            />
+          </div>
+
+          {/* 소분류 */}
+          <div>
+            <FieldLabel>소분류</FieldLabel>
             <Select
               className="mt-2"
               value={portfolioForm.category_id}
-              placeholder="카테고리 선택"
-              options={categoryOptions}
+              placeholder={portfolioForm.parent_category_id ? "소분류 선택" : "대분류를 먼저 선택하세요"}
+              options={subCategoryOptions}
               onChange={(value) => onChangeForm({ ...portfolioForm, category_id: value })}
             />
           </div>

@@ -20,7 +20,8 @@ export interface CategoryFormState {
 
 export interface PortfolioFormState {
   id: string;
-  category_id: string;
+  parent_category_id: string; // 대분류 선택용 (UI 전용)
+  category_id: string;        // 소분류 ID (API 전송값)
   title: string;
   description: string;
   is_featured: boolean;
