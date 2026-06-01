@@ -98,7 +98,7 @@ export default function StoryPage() {
                 transition={{ duration: 0.4, delay: i * 0.04, ease: "easeOut" }}
                 className="relative"
               >
-                <span className="absolute -left-[2.6rem] top-1 h-3 w-3 rounded-full border-2 border-accent bg-card" />
+                <span className="absolute -left-[39px] top-1 h-3 w-3 rounded-full border-2 border-accent bg-card" />
                 <span className="mr-5 text-sm font-semibold text-accent">
                   {item.year}
                 </span>

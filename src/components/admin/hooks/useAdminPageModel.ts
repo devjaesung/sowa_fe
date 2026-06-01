@@ -3,15 +3,21 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { sowaApi } from "../../../api/sowaApi";
 import type {
   Category,
+  CompanyHistory,
   DashboardStats,
   InquiryDetail,
   InquiryListItem,
   Portfolio,
   SiteSettings,
+  TeamMember,
 } from "../../../api/types";
 import type {
   CategoryEditorMode,
   CategoryFormState,
+  HistoryEditorMode,
+  HistoryFormState,
+  MemberEditorMode,
+  MemberFormState,
   NoticeState,
   PortfolioEditorMode,
   PortfolioFormState,
@@ -70,6 +76,21 @@ const createEmptySettingsForm = (): SettingsFormState => ({
   hero_image: null,
 });
 
+const createEmptyHistoryForm = (): HistoryFormState => ({
+  year: "",
+  content: "",
+  order: "0",
+});
+
+const createEmptyMemberForm = (): MemberFormState => ({
+  role: "",
+  name: "",
+  title: "",
+  education: "",
+  career: "",
+  order: "0",
+});
+
 const sortByOrder = <T extends { order?: number }>(list: T[]) =>
   [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
@@ -87,6 +108,12 @@ export function useAdminPageModel() {
   const [selectedAdminInquiryId, setSelectedAdminInquiryId] = useState("");
   const [commentText, setCommentText] = useState("");
   const [settingsForm, setSettingsForm] = useState<SettingsFormState>(createEmptySettingsForm);
+  const [historyEditorMode, setHistoryEditorMode] = useState<HistoryEditorMode>(null);
+  const [historyEditId, setHistoryEditId] = useState<number | null>(null);
+  const [historyForm, setHistoryForm] = useState<HistoryFormState>(createEmptyHistoryForm);
+  const [memberEditorMode, setMemberEditorMode] = useState<MemberEditorMode>(null);
+  const [memberEditId, setMemberEditId] = useState<number | null>(null);
+  const [memberForm, setMemberForm] = useState<MemberFormState>(createEmptyMemberForm);
 
   const sessionCheckQuery = useQuery({
     queryKey: ["admin-session-check"],
@@ -111,6 +138,18 @@ export function useAdminPageModel() {
   const portfolioQuery = useQuery({
     queryKey: ["admin-portfolio"],
     queryFn: sowaApi.admin.listPortfolio,
+    enabled: isAuthenticated,
+  });
+
+  const historyQuery = useQuery({
+    queryKey: ["admin-history"],
+    queryFn: sowaApi.admin.listHistory,
+    enabled: isAuthenticated,
+  });
+
+  const memberQuery = useQuery({
+    queryKey: ["admin-members"],
+    queryFn: sowaApi.admin.listMembers,
     enabled: isAuthenticated,
   });
 
@@ -148,6 +187,8 @@ export function useAdminPageModel() {
       queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
       queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
       queryClient.invalidateQueries({ queryKey: ["admin-portfolio"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-history"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-members"] });
       queryClient.invalidateQueries({ queryKey: ["admin-inquiry"] });
       queryClient.invalidateQueries({ queryKey: ["admin-settings"] });
     },
@@ -162,6 +203,8 @@ export function useAdminPageModel() {
       queryClient.removeQueries({ queryKey: ["admin-stats"] });
       queryClient.removeQueries({ queryKey: ["admin-categories"] });
       queryClient.removeQueries({ queryKey: ["admin-portfolio"] });
+      queryClient.removeQueries({ queryKey: ["admin-history"] });
+      queryClient.removeQueries({ queryKey: ["admin-members"] });
       queryClient.removeQueries({ queryKey: ["admin-inquiry"] });
       queryClient.removeQueries({ queryKey: ["admin-settings"] });
       setTimeout(() => {
@@ -288,6 +331,74 @@ export function useAdminPageModel() {
     onError: showError,
   });
 
+  const createHistoryMutation = useMutation({
+    mutationFn: sowaApi.admin.createHistory,
+    onSuccess: () => {
+      showSuccess("연혁 추가 완료");
+      setHistoryEditorMode(null);
+      setHistoryEditId(null);
+      setHistoryForm(createEmptyHistoryForm());
+      historyQuery.refetch();
+    },
+    onError: showError,
+  });
+
+  const updateHistoryMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: Parameters<typeof sowaApi.admin.updateHistory>[1] }) =>
+      sowaApi.admin.updateHistory(id, payload),
+    onSuccess: () => {
+      showSuccess("연혁 수정 완료");
+      setHistoryEditorMode(null);
+      setHistoryEditId(null);
+      setHistoryForm(createEmptyHistoryForm());
+      historyQuery.refetch();
+    },
+    onError: showError,
+  });
+
+  const deleteHistoryMutation = useMutation({
+    mutationFn: sowaApi.admin.deleteHistory,
+    onSuccess: () => {
+      showSuccess("연혁 삭제 완료");
+      historyQuery.refetch();
+    },
+    onError: showError,
+  });
+
+  const createMemberMutation = useMutation({
+    mutationFn: sowaApi.admin.createMember,
+    onSuccess: () => {
+      showSuccess("팀원 추가 완료");
+      setMemberEditorMode(null);
+      setMemberEditId(null);
+      setMemberForm(createEmptyMemberForm());
+      memberQuery.refetch();
+    },
+    onError: showError,
+  });
+
+  const updateMemberMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: Parameters<typeof sowaApi.admin.updateMember>[1] }) =>
+      sowaApi.admin.updateMember(id, payload),
+    onSuccess: () => {
+      showSuccess("팀원 수정 완료");
+      setMemberEditorMode(null);
+      setMemberEditId(null);
+      setMemberForm(createEmptyMemberForm());
+      memberQuery.refetch();
+    },
+    onError: showError,
+  });
+
+  const deleteMemberMutation = useMutation({
+    mutationFn: sowaApi.admin.deleteMember,
+    onSuccess: () => {
+      showSuccess("팀원 삭제 완료");
+      memberQuery.refetch();
+    },
+    onError: showError,
+  });
+
   const deleteInquiryMutation = useMutation({
     mutationFn: sowaApi.admin.deleteInquiry,
     onSuccess: () => {
@@ -335,10 +446,14 @@ export function useAdminPageModel() {
 
   const categoryList = toList<Category>(categoryQuery.data);
   const portfolioList = toList<Portfolio>(portfolioQuery.data);
+  const historyList = toList<CompanyHistory>(historyQuery.data);
+  const memberList = toList<TeamMember>(memberQuery.data);
   const inquiryList = toList<InquiryListItem>(adminInquiryQuery.data);
 
   const orderedCategoryList = useMemo(() => sortByOrder(categoryList), [categoryList]);
   const orderedPortfolioList = useMemo(() => sortByOrder(portfolioList), [portfolioList]);
+  const orderedHistoryList = useMemo(() => sortByOrder(historyList), [historyList]);
+  const orderedMemberList = useMemo(() => sortByOrder(memberList), [memberList]);
 
   const statsData = isStats(statsQuery.data) ? statsQuery.data : undefined;
   const inquiryDetail =
@@ -428,6 +543,61 @@ export function useAdminPageModel() {
     });
   };
 
+  const submitHistory = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!historyForm.year.trim() || !historyForm.content.trim()) {
+      setNotice({ tone: "error", message: "연도와 내용은 필수입니다." });
+      return;
+    }
+
+    const payload = {
+      year: historyForm.year.trim(),
+      content: historyForm.content.trim(),
+      order: Number(historyForm.order || "0"),
+    };
+
+    if (historyEditorMode === "edit") {
+      if (!historyEditId) {
+        setNotice({ tone: "error", message: "수정할 연혁을 선택해주세요." });
+        return;
+      }
+      updateHistoryMutation.mutate({ id: historyEditId, payload });
+      return;
+    }
+
+    createHistoryMutation.mutate(payload);
+  };
+
+  const submitMember = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!memberForm.role || !memberForm.name.trim()) {
+      setNotice({ tone: "error", message: "직책과 이름은 필수입니다." });
+      return;
+    }
+
+    const payload = {
+      role: memberForm.role as TeamMember["role"],
+      name: memberForm.name.trim(),
+      title: memberForm.title.trim() || undefined,
+      education: memberForm.education.trim() || undefined,
+      career: memberForm.career.trim() || undefined,
+      order: Number(memberForm.order || "0"),
+    };
+
+    if (memberEditorMode === "edit") {
+      if (!memberEditId) {
+        setNotice({ tone: "error", message: "수정할 팀원을 선택해주세요." });
+        return;
+      }
+      updateMemberMutation.mutate({ id: memberEditId, payload });
+      return;
+    }
+
+    createMemberMutation.mutate(payload);
+  };
+
   const submitSettings = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -485,6 +655,8 @@ export function useAdminPageModel() {
     submitCategory,
     submitPortfolioCreate,
     submitPortfolioUpdate,
+    submitHistory,
+    submitMember,
     submitSettings,
     createCategoryMutation,
     deleteCategoryMutation,
@@ -492,10 +664,28 @@ export function useAdminPageModel() {
     deletePortfolioMutation,
     deletePortfolioImageMutation,
     reorderPortfolioMutation,
+    deleteHistoryMutation,
+    deleteMemberMutation,
     deleteInquiryMutation,
     addCommentMutation,
     deleteCommentMutation,
     createEmptyPortfolioForm,
     createEmptySettingsForm,
+    historyEditorMode,
+    setHistoryEditorMode,
+    historyEditId,
+    setHistoryEditId,
+    historyForm,
+    setHistoryForm,
+    memberEditorMode,
+    setMemberEditorMode,
+    memberEditId,
+    setMemberEditId,
+    memberForm,
+    setMemberForm,
+    orderedHistoryList,
+    orderedMemberList,
+    createEmptyHistoryForm,
+    createEmptyMemberForm,
   };
 }

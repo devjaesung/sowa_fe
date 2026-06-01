@@ -6,6 +6,7 @@ import AdminInquiriesTab from "../components/admin/AdminInquiriesTab";
 import AdminLoginView from "../components/admin/AdminLoginView";
 import AdminPortfolioTab from "../components/admin/AdminPortfolioTab";
 import AdminSettingsTab from "../components/admin/AdminSettingsTab";
+import AdminStoryTab from "../components/admin/AdminStoryTab";
 import { useAdminPageModel } from "../components/admin/hooks/useAdminPageModel";
 import Skeleton from "../components/ui/Skeleton";
 import { useNavigate } from "react-router";
@@ -59,10 +60,30 @@ export default function AdminPage() {
     deletePortfolioMutation,
     deletePortfolioImageMutation,
     reorderPortfolioMutation,
+    deleteHistoryMutation,
+    deleteMemberMutation,
     deleteInquiryMutation,
     addCommentMutation,
     deleteCommentMutation,
     createEmptyPortfolioForm,
+    historyEditorMode,
+    setHistoryEditorMode,
+    historyEditId,
+    setHistoryEditId,
+    historyForm,
+    setHistoryForm,
+    memberEditorMode,
+    setMemberEditorMode,
+    memberEditId,
+    setMemberEditId,
+    memberForm,
+    setMemberForm,
+    orderedHistoryList,
+    orderedMemberList,
+    createEmptyHistoryForm,
+    createEmptyMemberForm,
+    submitHistory,
+    submitMember,
   } = useAdminPageModel();
 
   if (sessionCheckQuery.isLoading) {
@@ -144,6 +165,7 @@ export default function AdminPage() {
             <TabButton active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")}>대시보드</TabButton>
             <TabButton active={activeTab === "categories"} onClick={() => setActiveTab("categories")}>카테고리</TabButton>
             <TabButton active={activeTab === "portfolio"} onClick={() => setActiveTab("portfolio")}>포트폴리오</TabButton>
+            <TabButton active={activeTab === "story"} onClick={() => setActiveTab("story")}>스토리</TabButton>
             <TabButton active={activeTab === "inquiries"} onClick={() => setActiveTab("inquiries")}>문의/답변</TabButton>
             <TabButton active={activeTab === "settings"} onClick={() => setActiveTab("settings")}>사이트 설정</TabButton>
           </div>
@@ -233,6 +255,66 @@ export default function AdminPage() {
                 }));
               }}
               onReorder={(nextList) => reorderPortfolioMutation.mutate(nextList)}
+            />
+          ) : null}
+
+          {activeTab === "story" ? (
+            <AdminStoryTab
+              historyList={orderedHistoryList}
+              memberList={orderedMemberList}
+              historyEditorMode={historyEditorMode}
+              historyEditId={historyEditId}
+              historyForm={historyForm}
+              memberEditorMode={memberEditorMode}
+              memberEditId={memberEditId}
+              memberForm={memberForm}
+              onOpenCreateHistory={() => {
+                setHistoryEditorMode("create");
+                setHistoryEditId(null);
+                setHistoryForm(createEmptyHistoryForm());
+              }}
+              onCloseHistoryEditor={() => {
+                setHistoryEditorMode(null);
+                setHistoryEditId(null);
+                setHistoryForm(createEmptyHistoryForm());
+              }}
+              onChangeHistoryForm={setHistoryForm}
+              onSubmitHistory={submitHistory}
+              onEditHistory={(item) => {
+                setHistoryEditorMode("edit");
+                setHistoryEditId(item.id);
+                setHistoryForm({
+                  year: item.year,
+                  content: item.content,
+                  order: String(item.order ?? 0),
+                });
+              }}
+              onDeleteHistory={(id) => deleteHistoryMutation.mutate(id)}
+              onOpenCreateMember={() => {
+                setMemberEditorMode("create");
+                setMemberEditId(null);
+                setMemberForm(createEmptyMemberForm());
+              }}
+              onCloseMemberEditor={() => {
+                setMemberEditorMode(null);
+                setMemberEditId(null);
+                setMemberForm(createEmptyMemberForm());
+              }}
+              onChangeMemberForm={setMemberForm}
+              onSubmitMember={submitMember}
+              onEditMember={(member) => {
+                setMemberEditorMode("edit");
+                setMemberEditId(member.id);
+                setMemberForm({
+                  role: member.role,
+                  name: member.name,
+                  title: member.title ?? "",
+                  education: member.education ?? "",
+                  career: member.career ?? "",
+                  order: String(member.order ?? 0),
+                });
+              }}
+              onDeleteMember={(id) => deleteMemberMutation.mutate(id)}
             />
           ) : null}
 

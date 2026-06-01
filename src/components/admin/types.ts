@@ -1,9 +1,11 @@
 import type { PortfolioImage } from "../../api/types";
 
-export type TabKey = "dashboard" | "categories" | "portfolio" | "inquiries" | "settings";
+export type TabKey = "dashboard" | "categories" | "portfolio" | "story" | "inquiries" | "settings";
 export type NoticeTone = "success" | "error";
 export type PortfolioEditorMode = "create" | "edit" | null;
 export type CategoryEditorMode = "create" | "edit" | null;
+export type HistoryEditorMode = "create" | "edit" | null;
+export type MemberEditorMode = "create" | "edit" | null;
 
 export interface NoticeState {
   tone: NoticeTone;
@@ -33,4 +35,19 @@ export interface SettingsFormState {
   hero_subtitle: string | undefined;
   logo_image: File | null;
   hero_image: File | null;
+}
+
+export interface HistoryFormState {
+  year: string;
+  content: string;
+  order: string;
+}
+
+export interface MemberFormState {
+  role: string;
+  name: string;
+  title: string;
+  education: string;
+  career: string;
+  order: string;
 }
