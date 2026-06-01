@@ -24,6 +24,12 @@ export default function InquiryPage() {
           <h1 className="text-2xl font-medium tracking-[-0.01em] text-text-main md:text-4xl">
             문의하기
           </h1>
+          <div className="mt-4 flex flex-col items-center gap-1 text-sm text-text-muted">
+            <span>서울특별시 강남구 논현동 123-3번지, 1층</span>
+            <a href="mailto:ech0701@naver.com" className="hover:text-text-main transition-colors">
+              ech0701@naver.com
+            </a>
+          </div>
         </section>
       ) : null}
 
