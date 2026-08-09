@@ -66,6 +66,7 @@ export const useInquiryCreate = ({
     submitErrorMessage,
     submitSuccessMessage,
     setSubmitErrorMessage,
+    setSubmitSuccessMessage,
     isSubmitting: createInquiryMutation.isPending,
   };
 };

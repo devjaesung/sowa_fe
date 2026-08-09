@@ -11,6 +11,7 @@ interface InquiryFormSectionProps {
   onSubmitValues: (values: InquiryFormValues) => void;
   onCancel: () => void;
   submitErrorMessage?: string;
+  submitSuccessMessage?: string;
   isSubmitting?: boolean;
 }
 
@@ -19,6 +20,7 @@ export default function InquiryFormSection({
   onSubmitValues,
   onCancel,
   submitErrorMessage = "",
+  submitSuccessMessage = "",
   isSubmitting = false,
 }: InquiryFormSectionProps) {
   const {
@@ -41,7 +43,7 @@ export default function InquiryFormSection({
   };
 
   return (
-    <div className="mx-auto max-w-280 rounded-2xl border border-line bg-card p-5 shadow-sm md:p-6">
+    <div className="mx-auto max-w-280 rounded-lg border border-line bg-card p-4 shadow-sm sm:p-5 md:p-6">
       <form className="grid gap-4 lg:grid-cols-2" onSubmit={handleSubmit(onSubmitValues)}>
         <div className="space-y-1">
           <FieldLabel label="이름" required />
@@ -169,19 +171,23 @@ export default function InquiryFormSection({
           <p className="text-sm text-red-600 lg:col-span-2">{submitErrorMessage}</p>
         ) : null}
 
-        <div className="flex justify-center gap-3 pt-1 lg:col-span-2">
+        {submitSuccessMessage ? (
+          <p className="text-sm text-emerald-700 lg:col-span-2">{submitSuccessMessage}</p>
+        ) : null}
+
+        <div className="flex flex-col justify-center gap-3 pt-1 sm:flex-row lg:col-span-2">
           <Button
             type="button"
             onClick={onCancel}
             variant="outline"
-            className="h-11 min-w-28 border-line-strong px-5 hover:bg-card-soft"
+            className="h-11 w-full border-line-strong px-5 hover:bg-card-soft sm:w-auto sm:min-w-28"
             disabled={isSubmitting}
           >
             취소
           </Button>
           <Button
             type="submit"
-            className="h-11 min-w-36 px-7"
+            className="h-11 w-full px-7 sm:w-auto sm:min-w-36"
             disabled={isSubmitting}
           >
             {isSubmitting ? "등록 중..." : "문의 등록"}
