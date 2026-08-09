@@ -46,20 +46,20 @@ export default function PortfolioPage() {
 
   return (
     <div className="bg-surface-muted">
-      <section className="border-y border-line px-6 py-8 text-center md:py-10">
+      <section className="border-y border-line px-5 py-7 text-center sm:px-6 md:py-10">
         <h1 className="text-2xl font-medium tracking-[-0.01em] text-text-main md:text-4xl">
           포트폴리오
         </h1>
       </section>
 
-      <section className="mx-auto w-full max-w-310 px-6 py-14 md:py-16">
+      <section className="mx-auto w-full max-w-310 px-5 py-10 sm:px-6 md:py-16">
         {/* 대분류 필터 */}
         <div className="mb-3 flex flex-wrap gap-2">
           <Button
             type="button"
             shape="pill"
             variant={activeParentId === null ? "brand" : "outline"}
-            className="h-10 px-5"
+            className="h-10 px-4 sm:px-5"
             onClick={() => handleParentClick(null)}
           >
             전체
@@ -70,7 +70,7 @@ export default function PortfolioPage() {
               type="button"
               shape="pill"
               variant={activeParentId === cat.id ? "brand" : "outline"}
-              className="h-10 px-5"
+              className="h-10 px-4 sm:px-5"
               onClick={() => handleParentClick(cat.id)}
             >
               {cat.name}
@@ -85,7 +85,7 @@ export default function PortfolioPage() {
               type="button"
               shape="pill"
               variant={activeChildId === null ? "brand" : "outline"}
-              className="h-9 px-4 text-sm"
+              className="h-9 px-3 text-sm sm:px-4"
               onClick={() => setActiveChildId(null)}
             >
               전체
@@ -96,7 +96,7 @@ export default function PortfolioPage() {
                 type="button"
                 shape="pill"
                 variant={activeChildId === cat.id ? "brand" : "outline"}
-                className="h-9 px-4 text-sm"
+                className="h-9 px-3 text-sm sm:px-4"
                 onClick={() => setActiveChildId(cat.id)}
               >
                 {cat.name}

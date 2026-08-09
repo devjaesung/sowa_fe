@@ -19,10 +19,10 @@ export default function PortfolioDetailPage() {
 
   return (
     <div className="min-h-screen bg-surface-muted">
-      <section className="mx-auto w-full max-w-310 px-6 py-12 md:py-16">
+      <section className="mx-auto w-full max-w-310 px-5 py-8 sm:px-6 md:py-16">
         <Link
           to="/works"
-          className="mb-12 inline-flex items-center gap-2 text-sm text-text-muted transition-colors hover:text-text-main"
+          className="mb-8 inline-flex items-center gap-2 text-sm text-text-muted transition-colors hover:text-text-main md:mb-12"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -41,15 +41,15 @@ export default function PortfolioDetailPage() {
         </Link>
 
         {query.isLoading && (
-          <div className="flex gap-12">
-            <div className="w-56 shrink-0 space-y-4">
+          <div className="flex flex-col gap-8 md:flex-row md:gap-12">
+            <div className="w-full space-y-4 md:w-56 md:shrink-0">
               <Skeleton className="h-8 w-48" />
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-20 w-full" />
             </div>
             <div className="flex-1 space-y-4">
               {Array.from({ length: 3 }, (_, i) => (
-                <Skeleton key={i} className="h-80 w-full rounded-2xl" />
+                <Skeleton key={i} className="h-56 w-full rounded-lg md:h-80" />
               ))}
             </div>
           </div>
@@ -62,7 +62,7 @@ export default function PortfolioDetailPage() {
         )}
 
         {work && (
-          <div className="flex flex-col gap-10 md:flex-row md:gap-16">
+          <div className="flex flex-col gap-8 md:flex-row md:gap-16">
             {/* 왼쪽: 개요 */}
             <aside className="md:w-56 md:shrink-0">
               <div className="md:sticky md:top-24">
@@ -89,14 +89,14 @@ export default function PortfolioDetailPage() {
                       key={img.id}
                       src={resolveAssetUrl(img.image)}
                       alt={work.title}
-                      className="w-full rounded-2xl object-cover"
+                      className="w-full rounded-lg object-cover"
                     />
                   ))
                 : work.thumbnail && (
                     <img
                       src={resolveAssetUrl(work.thumbnail)}
                       alt={work.title}
-                      className="w-full rounded-2xl object-cover"
+                      className="w-full rounded-lg object-cover"
                     />
                   )}
             </div>

@@ -68,12 +68,12 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ amount: 0.25 }}
         transition={{ duration: 0.55, ease: "easeOut" }}
-        className="mx-auto h-screen w-full max-w-310 px-6 pt-12 md:pt-14"
+        className="mx-auto w-full max-w-310 px-5 pb-20 pt-10 sm:px-6 md:pb-24 md:pt-12 lg:py-14"
       >
-        <div className="grid items-center gap-10 lg:grid-cols-[0.44fr_0.56fr]">
+        <div className="grid items-center gap-8 lg:grid-cols-[0.44fr_0.56fr] lg:gap-10">
           <div>
             <Chip>Interior Design Studio</Chip>
-            <h1 className="mt-8 text-5xl font-medium leading-[1.1] tracking-tight text-text-main md:text-4xl">
+            <h1 className="mt-7 text-4xl font-medium leading-[1.15] text-text-main md:mt-8 md:text-5xl">
               {heroTitle}
             </h1>
             <p className="mt-7 max-w-105 text-base leading-relaxed text-text-muted">
@@ -99,10 +99,10 @@ export default function HomePage() {
             <img
               src={heroImage}
               alt="SOWA hero"
-              className="h-135 w-full rounded-tl-[56px] rounded-br-xl object-cover"
+              className="h-80 w-full rounded-br-lg rounded-tl-[32px] object-cover sm:h-96 md:rounded-tl-[56px] lg:h-135"
             />
-            <div className="absolute bottom-6 left-6 rounded-2xl bg-card px-6 py-5 shadow-lg">
-              <p className="text-3xl font-bold text-accent">10+</p>
+            <div className="absolute bottom-4 left-4 rounded-lg bg-card px-5 py-4 shadow-lg md:bottom-6 md:left-6 md:px-6 md:py-5">
+              <p className="text-2xl font-bold text-accent md:text-3xl">10+</p>
               <p className="text-xs font-medium uppercase tracking-[0.12em] text-text-muted">
                 Projects
               </p>
@@ -116,16 +116,16 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ amount: 0.2 }}
         transition={{ duration: 0.55, ease: "easeOut" }}
-        className="mx-auto w-full max-w-310 px-6 pb-28"
+        className="mx-auto w-full max-w-310 px-5 pb-20 sm:px-6 md:pb-28"
       >
         <Chip>Featured Projects</Chip>
-        <div className="mb-9 flex items-baseline justify-between">
+        <div className="mb-8 flex items-end justify-between gap-4 md:mb-9">
           <div>
-            <h2 className="mt-5 text-5xl font-medium tracking-tight text-text-main md:text-4xl">
+            <h2 className="mt-5 text-3xl font-medium text-text-main md:text-4xl">
               주요 프로젝트
             </h2>
           </div>
-          <ButtonLink to="/works" variant="ghost">
+          <ButtonLink to="/works" variant="ghost" className="shrink-0 px-2 sm:px-4">
             전체 보기 →
           </ButtonLink>
         </div>
@@ -177,12 +177,12 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ amount: 0.15 }}
         transition={{ duration: 0.55, ease: "easeOut" }}
-        className="mx-auto w-full max-w-310 px-6 pb-32"
+        className="mx-auto w-full max-w-310 px-5 pb-24 sm:px-6 md:pb-32"
       >
-        <div className="grid gap-10 lg:grid-cols-[0.47fr_0.53fr]">
+        <div className="grid gap-8 lg:grid-cols-[0.47fr_0.53fr] lg:gap-10">
           <div className="pt-4">
             <Chip>Get In Touch</Chip>
-            <h2 className="mt-6 text-5xl font-medium tracking-tight text-text-main md:text-4xl">
+            <h2 className="mt-6 text-3xl font-medium text-text-main md:text-4xl">
               인테리어 문의
             </h2>
             <p className="mt-6 max-w-117.5 text-base leading-relaxed text-text-muted">
@@ -192,11 +192,11 @@ export default function HomePage() {
             <ul className="mt-8 space-y-2 text-sm text-text-muted">
               <li>ech0701@naver.com</li>
               <li>+82 10-9457-7283</li>
-              <li>서울특별시, 강남구 논현동 123-3번지, 1층</li>
+              <li className="break-words">서울특별시, 강남구 논현동 123-3번지, 1층</li>
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-line bg-card p-7 shadow-sm md:p-8">
+          <div className="rounded-lg border border-line bg-card p-5 shadow-sm md:p-8">
             <form
               className="space-y-4"
               onSubmit={handleSubmit(homeInquiryState.onSubmitValues)}
