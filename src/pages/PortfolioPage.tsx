@@ -128,7 +128,9 @@ export default function PortfolioPage() {
               key={work.id}
               title={work.title}
               category={work.category?.name ?? "미분류"}
-              year={new Date(work.created_at).getFullYear().toString()}
+              year={work.year ?? undefined}
+              location={work.location ?? undefined}
+              area={work.area ?? undefined}
               image={work.thumbnail}
               summary={work.description}
               to={`/works/${work.id}`}

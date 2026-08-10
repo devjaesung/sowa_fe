@@ -50,6 +50,9 @@ export interface Portfolio {
   category: Category;
   title: string;
   description?: string;
+  year: string | null;
+  location: string | null;
+  area: string | null;
   is_featured?: boolean;
   order?: number;
   created_at: string;
@@ -60,6 +63,9 @@ export interface Portfolio {
 export interface PortfolioCreateRequest {
   title: string;
   description?: string;
+  year?: string | null;
+  location?: string | null;
+  area?: string | null;
   category_id?: number | null;
   is_featured?: boolean;
   order?: number;
@@ -69,6 +75,9 @@ export interface PortfolioCreateRequest {
 export interface PortfolioUpdateRequest {
   title?: string;
   description?: string;
+  year?: string | null;
+  location?: string | null;
+  area?: string | null;
   category_id?: number | null;
   is_featured?: boolean;
   order?: number;

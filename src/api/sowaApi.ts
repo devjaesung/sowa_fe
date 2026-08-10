@@ -179,7 +179,9 @@ const adminApi = {
   },
 
   updatePortfolio: async (id: number, payload: PortfolioUpdateRequest) => {
-    const body = toFormData(payload);
+    const body = toFormData(payload, {
+      preserveEmptyStringKeys: ["year", "location", "area"],
+    });
     const { data } = await apiClient.put<Portfolio>(
       `/api/dashboard-sowa/portfolio/${id}/`,
       body,

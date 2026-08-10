@@ -7,11 +7,23 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
-export const toFormData = (payload: object): FormData => {
+interface ToFormDataOptions {
+  preserveEmptyStringKeys?: string[];
+}
+
+export const toFormData = (
+  payload: object,
+  options: ToFormDataOptions = {},
+): FormData => {
   const formData = new FormData();
+  const preserveEmptyStringKeys = new Set(options.preserveEmptyStringKeys ?? []);
 
   Object.entries(payload as Record<string, unknown>).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === "") {
+    if (
+      value === undefined ||
+      value === null ||
+      (value === "" && !preserveEmptyStringKeys.has(key))
+    ) {
       return;
     }
 

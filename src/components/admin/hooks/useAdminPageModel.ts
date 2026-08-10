@@ -63,6 +63,9 @@ const createEmptyPortfolioForm = (): PortfolioFormState => ({
   category_id: "",
   title: "",
   description: "",
+  year: "",
+  location: "",
+  area: "",
   is_featured: false,
   order: "0",
   images: [],
@@ -510,16 +513,25 @@ export function useAdminPageModel() {
   const submitPortfolioCreate = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!portfolioForm.title) {
+    if (!portfolioForm.title.trim()) {
       setNotice({ tone: "error", message: "포트폴리오 생성은 제목이 필수입니다." });
+      return;
+    }
+
+    const year = portfolioForm.year.trim();
+    if (year && !/^\d{4}$/.test(year)) {
+      setNotice({ tone: "error", message: "YEAR는 숫자 4자리로 입력해주세요." });
       return;
     }
 
     createPortfolioMutation.mutate({
       category_id: portfolioForm.category_id ? Number(portfolioForm.category_id) : null,
-      title: portfolioForm.title,
+      title: portfolioForm.title.trim(),
       images: portfolioForm.images.length > 0 ? portfolioForm.images : undefined,
       description: portfolioForm.description,
+      year: year || undefined,
+      location: portfolioForm.location.trim() || undefined,
+      area: portfolioForm.area.trim() || undefined,
       is_featured: portfolioForm.is_featured,
       order: Number(portfolioForm.order || "0"),
     });
@@ -531,13 +543,22 @@ export function useAdminPageModel() {
       return;
     }
 
+    const year = portfolioForm.year.trim();
+    if (year && !/^\d{4}$/.test(year)) {
+      setNotice({ tone: "error", message: "YEAR는 숫자 4자리로 입력해주세요." });
+      return;
+    }
+
     updatePortfolioMutation.mutate({
       id: Number(portfolioForm.id),
       payload: {
         category_id: portfolioForm.category_id ? Number(portfolioForm.category_id) : null,
-        title: portfolioForm.title,
+        title: portfolioForm.title.trim(),
         images: portfolioForm.images.length > 0 ? portfolioForm.images : undefined,
         description: portfolioForm.description,
+        year,
+        location: portfolioForm.location.trim(),
+        area: portfolioForm.area.trim(),
         is_featured: portfolioForm.is_featured,
         order: Number(portfolioForm.order || "0"),
       },

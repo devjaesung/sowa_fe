@@ -130,7 +130,9 @@ export default function HomePage() {
               key={project.id}
               title={project.title}
               category={project.category?.name ?? "미분류"}
-              year={new Date(project.created_at).getFullYear().toString()}
+              year={project.year ?? undefined}
+              location={project.location ?? undefined}
+              area={project.area ?? undefined}
               image={project.thumbnail}
               summary={project.description}
             />

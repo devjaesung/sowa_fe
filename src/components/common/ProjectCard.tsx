@@ -6,14 +6,25 @@ interface ProjectCardProps {
   title: string;
   category: string;
   area?: string;
+  location?: string;
   year?: string;
   image: string;
   summary?: string;
   to?: string;
 }
 
-export default function ProjectCard({ title, category, area, year, image, summary, to }: ProjectCardProps) {
+export default function ProjectCard({
+  title,
+  category,
+  area,
+  location,
+  year,
+  image,
+  summary,
+  to,
+}: ProjectCardProps) {
   const imageSrc = resolveAssetUrl(image);
+  const metadata = [location, area].filter(Boolean);
 
   const inner = (
     <>
@@ -25,7 +36,9 @@ export default function ProjectCard({ title, category, area, year, image, summar
         </div>
         <h3 className="mt-2 text-2xl font-semibold tracking-tight text-text-main">{title}</h3>
         {summary ? <p className="mt-2 text-sm leading-relaxed text-text-muted">{summary}</p> : null}
-        {area ? <p className="mt-4 text-sm text-text-muted">{area}</p> : null}
+        {metadata.length > 0 ? (
+          <p className="mt-4 text-sm text-text-muted">{metadata.join(" · ")}</p>
+        ) : null}
       </div>
     </>
   );

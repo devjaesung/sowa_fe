@@ -151,6 +151,45 @@ export default function AdminPortfolioTab({
             />
           </div>
 
+          <div>
+            <FieldLabel>YEAR</FieldLabel>
+            <TextInput
+              className="mt-2"
+              value={portfolioForm.year}
+              inputMode="numeric"
+              maxLength={4}
+              placeholder="예: 2026"
+              onChange={(e) =>
+                onChangeForm({
+                  ...portfolioForm,
+                  year: e.target.value.replace(/\D/g, "").slice(0, 4),
+                })
+              }
+            />
+          </div>
+
+          <div>
+            <FieldLabel>LOCATION</FieldLabel>
+            <TextInput
+              className="mt-2"
+              value={portfolioForm.location}
+              maxLength={200}
+              placeholder="예: 서울특별시 강남구"
+              onChange={(e) => onChangeForm({ ...portfolioForm, location: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <FieldLabel>AREA</FieldLabel>
+            <TextInput
+              className="mt-2"
+              value={portfolioForm.area}
+              maxLength={100}
+              placeholder="예: 32평, 105㎡"
+              onChange={(e) => onChangeForm({ ...portfolioForm, area: e.target.value })}
+            />
+          </div>
+
           {/* 메인 노출 */}
           <label className="flex items-end gap-2 pb-2 text-sm text-text-main">
             <input
@@ -344,6 +383,11 @@ function SortablePortfolioCard({
 
       <div className="space-y-1 px-4 py-3">
         <p className="text-sm font-medium text-text-main">{item.title}</p>
+        {item.year || item.location || item.area ? (
+          <p className="text-xs text-text-muted">
+            {[item.year, item.location, item.area].filter(Boolean).join(" · ")}
+          </p>
+        ) : null}
         <p className="text-xs text-text-muted">
           #{item.id} | {item.category?.name ?? "-"} | 이미지 {item.images.length}장 | 순서{" "}
           {item.order ?? 0}
