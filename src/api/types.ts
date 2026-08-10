@@ -1,5 +1,11 @@
 export type Age = "20" | "30" | "40" | "";
 export type InteriorType = "residential" | "commercial" | "";
+export type ReferralSource =
+  | "acquaintance"
+  | "blog"
+  | "youtube"
+  | "instagram"
+  | "other";
 export type RoleEnum = "director" | "manager" | "assistant" | "staff";
 
 export interface MessageResponse {
@@ -132,6 +138,10 @@ export interface InquiryDetail {
   interior_type?: InteriorType;
   area?: string;
   move_in_date?: string;
+  desired_budget?: string | null;
+  construction_start_date?: string | null;
+  referral_source?: string | null;
+  referral_source_other?: string | null;
   work_request?: string;
   content?: string;
   created_at: string;
@@ -141,17 +151,16 @@ export interface InquiryDetail {
 export interface InquiryCreateRequest {
   name: string;
   phone: string;
-  password: string;
   age?: Age;
   interior_type?: InteriorType;
   area?: string;
   move_in_date?: string;
+  desired_budget?: string;
+  construction_start_date?: string;
+  referral_source?: ReferralSource;
+  referral_source_other?: string;
   work_request?: string;
   content?: string;
-}
-
-export interface InquiryPasswordRequest {
-  password: string;
 }
 
 // ─── Site Settings ──────────────────────────────────────────────────────────

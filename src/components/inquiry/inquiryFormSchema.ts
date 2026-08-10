@@ -9,15 +9,23 @@ export const inquiryFormSchema = z.object({
   phone: z
     .string()
     .regex(/^\d{3}-\d{4}-\d{4}$/, "연락처는 000-0000-0000 형식으로 입력해주세요."),
-  password: z
-    .string()
-    .trim()
-    .min(1, "비밀번호를 입력해주세요.")
-    .max(50, "비밀번호는 50자 이하로 입력해주세요."),
   age: z.enum(["", "20", "30", "40"]),
   interiorType: z.enum(["", "residential", "commercial"]),
   area: z.string(),
   moveInDate: z.string(),
+  desiredBudget: z.string().max(100, "희망예산은 100자 이하로 입력해주세요."),
+  constructionStartDate: z.string(),
+  referralSource: z.enum([
+    "",
+    "acquaintance",
+    "blog",
+    "youtube",
+    "instagram",
+    "other",
+  ]),
+  referralSourceOther: z
+    .string()
+    .max(200, "기타 경로는 200자 이하로 입력해주세요."),
   workRequest: z.string(),
   content: z.string(),
 });
@@ -27,11 +35,14 @@ export type InquiryFormValues = z.infer<typeof inquiryFormSchema>;
 export const initialInquiryFormValues: InquiryFormValues = {
   name: "",
   phone: "",
-  password: "",
   age: "",
   interiorType: "",
   area: "",
   moveInDate: "",
+  desiredBudget: "",
+  constructionStartDate: "",
+  referralSource: "",
+  referralSourceOther: "",
   workRequest: "",
   content: "",
 };

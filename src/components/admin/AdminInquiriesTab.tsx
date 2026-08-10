@@ -5,8 +5,14 @@ import Chip from "../ui/Chip";
 import FieldLabel from "../ui/FieldLabel";
 import TextArea from "../ui/TextArea";
 import TextInput from "../ui/TextInput";
+import { getReferralSourceLabel } from "../inquiry/referralSources";
 
 const smallButtonClass = "h-9 px-3 text-sm";
+const ageLabels = { "20": "20대", "30": "30대", "40": "40대" } as const;
+const interiorTypeLabels = {
+  residential: "주거",
+  commercial: "상업",
+} as const;
 
 interface AdminInquiriesTabProps {
   inquiryList: InquiryListItem[];
@@ -159,10 +165,27 @@ function InquiryDetailCard({ inquiry }: { inquiry: InquiryDetail }) {
         #{inquiry.id} {inquiry.name}
       </p>
       <p>연락처: {inquiry.phone}</p>
-      <p>연령대: {inquiry.age || "-"}</p>
-      <p>인테리어 타입: {inquiry.interior_type || "-"}</p>
+      <p>
+        연령대: {inquiry.age ? ageLabels[inquiry.age as keyof typeof ageLabels] ?? inquiry.age : "-"}
+      </p>
+      <p>
+        인테리어 타입:{" "}
+        {inquiry.interior_type
+          ? interiorTypeLabels[inquiry.interior_type as keyof typeof interiorTypeLabels] ??
+            inquiry.interior_type
+          : "-"}
+      </p>
       <p>평수: {inquiry.area || "-"}</p>
       <p>입주 예정일: {inquiry.move_in_date || "-"}</p>
+      <p>희망예산: {inquiry.desired_budget || "-"}</p>
+      <p>공사 시작 희망일: {inquiry.construction_start_date || "-"}</p>
+      <p>
+        알게 된 경로:{" "}
+        {inquiry.referral_source ? getReferralSourceLabel(inquiry.referral_source) : "-"}
+      </p>
+      {inquiry.referral_source_other ? (
+        <p>기타 경로: {inquiry.referral_source_other}</p>
+      ) : null}
       <p>요청 공사: {inquiry.work_request || "-"}</p>
       <p>기타 요청: {inquiry.content || "-"}</p>
       <p className="text-text-muted">답변 {comments.length}건</p>
