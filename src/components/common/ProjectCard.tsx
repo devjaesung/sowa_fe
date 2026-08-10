@@ -7,24 +7,17 @@ interface ProjectCardProps {
   category: string;
   area?: string;
   year?: string;
-  location?: string;
-  image?: string | null;
+  image: string;
   summary?: string;
   to?: string;
 }
 
-export default function ProjectCard({ title, category, area, year, location, image, summary, to }: ProjectCardProps) {
+export default function ProjectCard({ title, category, area, year, image, summary, to }: ProjectCardProps) {
   const imageSrc = resolveAssetUrl(image);
 
   const inner = (
     <>
-      {imageSrc ? (
-        <img src={imageSrc} alt={title} className="h-52 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-      ) : (
-        <div className="flex h-52 w-full items-center justify-center bg-panel text-sm text-text-subtle">
-          이미지 없음
-        </div>
-      )}
+      <img src={imageSrc} alt={title} className="h-52 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
       <div className="p-5">
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold tracking-[0.08em] text-text-muted">{category}</p>
@@ -32,11 +25,7 @@ export default function ProjectCard({ title, category, area, year, location, ima
         </div>
         <h3 className="mt-2 text-2xl font-semibold tracking-tight text-text-main">{title}</h3>
         {summary ? <p className="mt-2 text-sm leading-relaxed text-text-muted">{summary}</p> : null}
-        {location || area ? (
-          <p className="mt-4 text-sm text-text-muted">
-            {[location, area].filter(Boolean).join(" · ")}
-          </p>
-        ) : null}
+        {area ? <p className="mt-4 text-sm text-text-muted">{area}</p> : null}
       </div>
     </>
   );

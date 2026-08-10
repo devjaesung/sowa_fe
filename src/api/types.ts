@@ -44,22 +44,16 @@ export interface Portfolio {
   category: Category;
   title: string;
   description?: string;
-  year?: string | null;
-  location?: string | null;
-  area?: string | null;
   is_featured?: boolean;
   order?: number;
   created_at: string;
-  thumbnail: string | null; // 첫 번째 이미지 URL
+  thumbnail: string; // 첫 번째 이미지 URL
   images: PortfolioImage[];
 }
 
 export interface PortfolioCreateRequest {
   title: string;
   description?: string;
-  year?: string | null;
-  location?: string | null;
-  area?: string | null;
   category_id?: number | null;
   is_featured?: boolean;
   order?: number;
@@ -69,9 +63,6 @@ export interface PortfolioCreateRequest {
 export interface PortfolioUpdateRequest {
   title?: string;
   description?: string;
-  year?: string | null;
-  location?: string | null;
-  area?: string | null;
   category_id?: number | null;
   is_featured?: boolean;
   order?: number;
@@ -141,10 +132,6 @@ export interface InquiryDetail {
   interior_type?: InteriorType;
   area?: string;
   move_in_date?: string;
-  desired_budget?: string | null;
-  construction_start_date?: string | null;
-  referral_source?: string | null;
-  referral_source_other?: string | null;
   work_request?: string;
   content?: string;
   created_at: string;
@@ -154,17 +141,17 @@ export interface InquiryDetail {
 export interface InquiryCreateRequest {
   name: string;
   phone: string;
-  password?: string;
+  password: string;
   age?: Age;
   interior_type?: InteriorType;
   area?: string;
   move_in_date?: string;
-  desired_budget?: string;
-  construction_start_date?: string;
-  referral_source?: string;
-  referral_source_other?: string;
   work_request?: string;
   content?: string;
+}
+
+export interface InquiryPasswordRequest {
+  password: string;
 }
 
 // ─── Site Settings ──────────────────────────────────────────────────────────

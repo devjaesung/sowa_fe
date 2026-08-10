@@ -24,9 +24,6 @@ export interface PortfolioFormState {
   category_id: string;        // 소분류 ID (API 전송값)
   title: string;
   description: string;
-  year: string;
-  location: string;
-  area: string;
   is_featured: boolean;
   order: string;
   images: File[];            // 새로 업로드할 파일들

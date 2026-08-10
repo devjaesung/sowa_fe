@@ -9,6 +9,7 @@ import type {
   InquiryCreateRequest,
   InquiryDetail,
   InquiryListItem,
+  InquiryPasswordRequest,
   LoginRequest,
   MessageResponse,
   PaginatedResponse,
@@ -90,6 +91,11 @@ const publicApi = {
   },
 
   // Inquiry
+  getInquiryList: async () => {
+    const { data } = await apiClient.get<InquiryListItem[]>("/api/inquiry/");
+    return data;
+  },
+
   createInquiry: async (payload: InquiryCreateRequest) => {
     const { data } = await apiClient.post<InquiryDetail>(
       "/api/inquiry/create/",
@@ -98,6 +104,13 @@ const publicApi = {
     return data;
   },
 
+  verifyInquiry: async (id: number, payload?: InquiryPasswordRequest) => {
+    const { data } = await apiClient.post<InquiryDetail>(
+      `/api/inquiry/${id}/verify/`,
+      payload ?? {},
+    );
+    return data;
+  },
 };
 
 // ─── Admin API ───────────────────────────────────────────────────────────────

@@ -15,11 +15,11 @@ export default function PortfolioDetailPage() {
   });
 
   const work = query.data;
-  const year = work?.year ?? null;
+  const year = work ? new Date(work.created_at).getFullYear().toString() : null;
 
   return (
     <div className="min-h-screen bg-surface-muted">
-      <section className="mx-auto w-full max-w-310 px-4 py-10 sm:px-6 md:py-16">
+      <section className="mx-auto w-full max-w-310 px-6 py-12 md:py-16">
         <Link
           to="/works"
           className="mb-12 inline-flex items-center gap-2 text-sm text-text-muted transition-colors hover:text-text-main"
@@ -73,22 +73,6 @@ export default function PortfolioDetailPage() {
                   {work.category?.name ?? "미분류"}
                   {year ? ` · ${year}` : ""}
                 </p>
-                {work.location || work.area ? (
-                  <dl className="mt-5 space-y-2 text-sm text-text-muted">
-                    {work.location ? (
-                      <div>
-                        <dt className="text-xs font-semibold text-text-subtle">LOCATION</dt>
-                        <dd>{work.location}</dd>
-                      </div>
-                    ) : null}
-                    {work.area ? (
-                      <div>
-                        <dt className="text-xs font-semibold text-text-subtle">AREA</dt>
-                        <dd>{work.area}</dd>
-                      </div>
-                    ) : null}
-                  </dl>
-                ) : null}
                 {work.description && (
                   <p className="mt-6 text-sm leading-relaxed text-text-muted">
                     {work.description}

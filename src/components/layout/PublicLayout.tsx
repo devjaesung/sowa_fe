@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { HiOutlineMenuAlt3, HiOutlineX } from "react-icons/hi";
 import { NavLink, Outlet } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 import logoImage from "../../assets/sowa_icon.png";
 import footerLogoImage from "../../assets/sowa_ic_white.png";
 import { sowaApi } from "../../api/sowaApi";
@@ -12,13 +10,7 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? "text-text-main" : "text-text-subtle hover:text-text-main"
   }`;
 
-const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `block border-b border-line py-5 text-left text-xl font-medium tracking-[0.04em] ${
-    isActive ? "text-text-main" : "text-text-muted"
-  }`;
-
 export default function PublicLayout() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const adminSessionQuery = useQuery({
     queryKey: ["admin-session-check-public-nav"],
     queryFn: sowaApi.admin.getStats,
@@ -33,78 +25,56 @@ export default function PublicLayout() {
   const logoSrc = resolveAssetUrl(settingsQuery.data?.logo_image) || logoImage;
   const footerLogoSrc =
     resolveAssetUrl(settingsQuery.data?.logo_image) || footerLogoImage;
-  const navItems = [
-    { to: "/", label: "HOME", end: true },
-    { to: "/story", label: "STORY" },
-    { to: "/works", label: "WORKS" },
-    { to: "/contact", label: "CONTACT" },
-    ...(adminSessionQuery.isSuccess ? [{ to: "/admin", label: "ADMIN" }] : []),
-  ];
-
-  useEffect(() => {
-    document.body.style.overflow = isMenuOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isMenuOpen]);
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-surface text-text-main">
-      <header className="sticky top-0 z-30 border-b border-line bg-card/90 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 w-full max-w-310 items-center justify-between px-4 sm:px-6 md:h-20">
-          <NavLink to="/" className="inline-flex items-center" onClick={() => setIsMenuOpen(false)}>
-            <img src={logoSrc} alt={siteTitle} className="h-8 w-auto md:h-10" />
+    <div className="flex min-h-screen flex-col bg-surface text-text-main">
+      <header className="sticky top-0 z-20 border-b border-line bg-card/75 backdrop-blur-sm">
+        <div className="mx-auto flex h-20 w-full max-w-310 items-center justify-between px-6">
+          <NavLink to="/" className="inline-flex items-center">
+            <img src={logoSrc} alt={siteTitle} className="h-9 w-auto md:h-10" />
           </NavLink>
 
-          <nav className="hidden items-center gap-8 md:flex lg:gap-11">
-            {navItems.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.end} className={linkClass}>
-                {item.label}
+          <nav className="flex items-center gap-8 md:gap-11">
+            <NavLink to="/" end className={linkClass}>
+              HOME
+            </NavLink>
+            <NavLink to="/story" className={linkClass}>
+              STORY
+            </NavLink>
+            <NavLink to="/works" className={linkClass}>
+              WORKS
+            </NavLink>
+            <NavLink to="/contact" className={linkClass}>
+              CONTACT
+            </NavLink>
+            {adminSessionQuery.isSuccess ? (
+              <NavLink to="/admin" className={linkClass}>
+                ADMIN
               </NavLink>
-            ))}
+            ) : null}
           </nav>
-
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center text-2xl md:hidden"
-            aria-label={isMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
-            aria-expanded={isMenuOpen}
-            onClick={() => setIsMenuOpen((open) => !open)}
-          >
-            {isMenuOpen ? <HiOutlineX /> : <HiOutlineMenuAlt3 />}
-          </button>
         </div>
       </header>
-
-      {isMenuOpen ? (
-        <nav className="fixed inset-x-0 bottom-0 top-16 z-20 overflow-y-auto bg-card px-6 py-6 md:hidden">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={mobileLinkClass}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-      ) : null}
 
       <main className="flex-1">
         <Outlet />
       </main>
 
-      <footer className="bg-footer py-8 text-footer-text md:py-9">
-        <div className="mx-auto grid w-full max-w-310 gap-6 px-4 text-sm sm:px-6 md:grid-cols-3 md:items-start">
-          <div className="flex justify-start md:self-end">
-            <img src={footerLogoSrc} alt={siteTitle} className="h-9 w-auto brightness-0 invert" />
+      <footer className="bg-footer py-9 text-footer-text">
+        <div className="mx-auto grid w-full max-w-310 gap-6 px-6 text-sm md:grid-cols-3 md:items-start">
+          <div className="flex justify-center md:self-end md:justify-start">
+            <img
+              src={footerLogoSrc}
+              alt={siteTitle}
+              className="h-9 w-auto brightness-0 invert"
+            />
           </div>
-          <div className="text-left md:self-end md:text-center">
+
+          <div className="text-center md:self-end">
             <p>© 2024 SOWA INTERIOR. All rights reserved.</p>
           </div>
-          <div className="space-y-1 text-left md:text-right">
+
+          <div className="space-y-1 text-center md:text-right">
             <p>Principal designer : 이창훈</p>
             <p>ech0701@naver.com</p>
             <p>+82 10-9457-7283</p>

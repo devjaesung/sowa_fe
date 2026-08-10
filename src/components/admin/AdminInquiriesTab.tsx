@@ -163,10 +163,6 @@ function InquiryDetailCard({ inquiry }: { inquiry: InquiryDetail }) {
       <p>인테리어 타입: {inquiry.interior_type || "-"}</p>
       <p>평수: {inquiry.area || "-"}</p>
       <p>입주 예정일: {inquiry.move_in_date || "-"}</p>
-      <p>공사 시작 희망일: {inquiry.construction_start_date || "-"}</p>
-      <p>희망예산: {inquiry.desired_budget || "-"}</p>
-      <p>알게 된 경로: {inquiry.referral_source || "-"}</p>
-      <p>기타 경로: {inquiry.referral_source_other || "-"}</p>
       <p>요청 공사: {inquiry.work_request || "-"}</p>
       <p>기타 요청: {inquiry.content || "-"}</p>
       <p className="text-text-muted">답변 {comments.length}건</p>

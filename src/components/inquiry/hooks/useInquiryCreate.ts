@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { sowaApi } from "../../../api/sowaApi";
@@ -19,6 +19,7 @@ export const useInquiryCreate = ({
   onCreated,
   successMessage,
 }: UseInquiryCreateParams = {}) => {
+  const queryClient = useQueryClient();
   const [submitErrorMessage, setSubmitErrorMessage] = useState("");
   const [submitSuccessMessage, setSubmitSuccessMessage] = useState("");
 
@@ -34,6 +35,7 @@ export const useInquiryCreate = ({
       setSubmitErrorMessage("");
       setSubmitSuccessMessage(successMessage ?? "");
       form.reset(initialInquiryFormValues);
+      queryClient.invalidateQueries({ queryKey: ["public-inquiry"] });
       onCreated?.();
     },
     onError: (error) => {
@@ -48,26 +50,14 @@ export const useInquiryCreate = ({
     createInquiryMutation.mutate({
       name: values.name.trim(),
       phone: values.phone.trim(),
+      password: values.password,
       age: values.age || undefined,
       interior_type: values.interiorType || undefined,
       area: values.area.trim() || undefined,
       move_in_date: values.moveInDate || undefined,
-      desired_budget: values.desiredBudget.trim() || undefined,
-      construction_start_date: values.constructionStartDate || undefined,
-      referral_source: values.referralSource || undefined,
-      referral_source_other:
-        values.referralSource === "other"
-          ? values.referralSourceOther.trim() || undefined
-          : undefined,
       work_request: values.workRequest.trim() || undefined,
       content: values.content.trim() || undefined,
     });
-  };
-
-  const resetForm = () => {
-    form.reset(initialInquiryFormValues);
-    setSubmitErrorMessage("");
-    setSubmitSuccessMessage("");
   };
 
   return {
@@ -76,7 +66,6 @@ export const useInquiryCreate = ({
     submitErrorMessage,
     submitSuccessMessage,
     setSubmitErrorMessage,
-    resetForm,
     isSubmitting: createInquiryMutation.isPending,
   };
 };

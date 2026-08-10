@@ -11,7 +11,6 @@ interface InquiryFormSectionProps {
   onSubmitValues: (values: InquiryFormValues) => void;
   onCancel: () => void;
   submitErrorMessage?: string;
-  submitSuccessMessage?: string;
   isSubmitting?: boolean;
 }
 
@@ -20,7 +19,6 @@ export default function InquiryFormSection({
   onSubmitValues,
   onCancel,
   submitErrorMessage = "",
-  submitSuccessMessage = "",
   isSubmitting = false,
 }: InquiryFormSectionProps) {
   const {
@@ -75,6 +73,28 @@ export default function InquiryFormSection({
           {errors.phone ? (
             <p className="text-xs text-red-600">{errors.phone.message}</p>
           ) : null}
+
+          <FieldLabel label="비밀번호" required />
+          <TextInput
+            value={watch("password")}
+            onValueChange={(value) =>
+              setValue("password", value, {
+                shouldDirty: true,
+                shouldTouch: true,
+                shouldValidate: true,
+              })
+            }
+            placeholder="글 조회 시 필요한 비밀번호"
+            type="password"
+            maxLength={50}
+            required
+          />
+          {errors.password ? (
+            <p className="text-xs text-red-600">{errors.password.message}</p>
+          ) : null}
+          <p className=" text-xs text-text-muted">
+            문의 내용 확인 시 필요합니다
+          </p>
 
           <FieldLabel label="연령대" />
           <div className="flex flex-wrap gap-5 text-sm text-text-main">
@@ -132,46 +152,6 @@ export default function InquiryFormSection({
             type="date"
           />
 
-          <FieldLabel label="공사 시작 희망일" />
-          <TextInput
-            {...register("constructionStartDate")}
-            type="date"
-          />
-
-          <FieldLabel label="희망예산" />
-          <TextInput
-            {...register("desiredBudget")}
-            placeholder="예: 5000만원~7000만원"
-          />
-
-          <FieldLabel label="알게 된 경로" />
-          <div className="flex flex-wrap gap-5 text-sm text-text-main">
-            <RadioOption
-              checked={watch("referralSource") === "blog"}
-              label="블로그"
-              name="referralSource"
-              onChange={() => setValue("referralSource", "blog", { shouldDirty: true })}
-            />
-            <RadioOption
-              checked={watch("referralSource") === "youtube"}
-              label="유튜브"
-              name="referralSource"
-              onChange={() => setValue("referralSource", "youtube", { shouldDirty: true })}
-            />
-            <RadioOption
-              checked={watch("referralSource") === "other"}
-              label="기타"
-              name="referralSource"
-              onChange={() => setValue("referralSource", "other", { shouldDirty: true })}
-            />
-          </div>
-          {watch("referralSource") === "other" ? (
-            <TextInput
-              {...register("referralSourceOther")}
-              placeholder="알게 된 경로를 입력해주세요"
-            />
-          ) : null}
-
           <FieldLabel label="원하는 공사" />
           <TextArea
             {...register("workRequest")}
@@ -187,9 +167,6 @@ export default function InquiryFormSection({
 
         {submitErrorMessage ? (
           <p className="text-sm text-red-600 lg:col-span-2">{submitErrorMessage}</p>
-        ) : null}
-        {submitSuccessMessage ? (
-          <p className="text-sm text-green-700 lg:col-span-2">{submitSuccessMessage}</p>
         ) : null}
 
         <div className="flex justify-center gap-3 pt-1 lg:col-span-2">
