@@ -46,13 +46,13 @@ export default function PortfolioPage() {
 
   return (
     <div className="bg-surface-muted">
-      <section className="border-y border-line px-6 py-8 text-center md:py-10">
+      <section className="border-y border-line px-4 py-8 text-center sm:px-6 md:py-10">
         <h1 className="text-2xl font-medium tracking-[-0.01em] text-text-main md:text-4xl">
           포트폴리오
         </h1>
       </section>
 
-      <section className="mx-auto w-full max-w-310 px-6 py-14 md:py-16">
+      <section className="mx-auto w-full max-w-310 px-4 py-10 sm:px-6 md:py-16">
         {/* 대분류 필터 */}
         <div className="mb-3 flex flex-wrap gap-2">
           <Button
@@ -128,7 +128,9 @@ export default function PortfolioPage() {
               key={work.id}
               title={work.title}
               category={work.category?.name ?? "미분류"}
-              year={new Date(work.created_at).getFullYear().toString()}
+              year={work.year ?? undefined}
+              location={work.location ?? undefined}
+              area={work.area ?? undefined}
               image={work.thumbnail}
               summary={work.description}
               to={`/works/${work.id}`}

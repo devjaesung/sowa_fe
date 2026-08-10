@@ -68,12 +68,12 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ amount: 0.25 }}
         transition={{ duration: 0.55, ease: "easeOut" }}
-        className="mx-auto h-screen w-full max-w-310 px-6 pt-12 md:pt-14"
+        className="mx-auto w-full max-w-310 px-4 py-10 sm:px-6 md:py-14 lg:min-h-[calc(100svh-5rem)]"
       >
         <div className="grid items-center gap-10 lg:grid-cols-[0.44fr_0.56fr]">
           <div>
             <Chip>Interior Design Studio</Chip>
-            <h1 className="mt-8 text-5xl font-medium leading-[1.1] tracking-tight text-text-main md:text-4xl">
+            <h1 className="mt-8 text-3xl font-medium leading-[1.1] tracking-tight text-text-main sm:text-4xl lg:text-5xl">
               {heroTitle}
             </h1>
             <p className="mt-7 max-w-105 text-base leading-relaxed text-text-muted">
@@ -99,7 +99,7 @@ export default function HomePage() {
             <img
               src={heroImage}
               alt="SOWA hero"
-              className="h-135 w-full rounded-tl-[56px] rounded-br-xl object-cover"
+              className="h-80 w-full rounded-tl-[40px] rounded-br-xl object-cover sm:h-110 lg:h-135 lg:rounded-tl-[56px]"
             />
             <div className="absolute bottom-6 left-6 rounded-2xl bg-card px-6 py-5 shadow-lg">
               <p className="text-3xl font-bold text-accent">10+</p>
@@ -116,12 +116,12 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ amount: 0.2 }}
         transition={{ duration: 0.55, ease: "easeOut" }}
-        className="mx-auto w-full max-w-310 px-6 pb-28"
+        className="mx-auto w-full max-w-310 px-4 pb-20 sm:px-6 md:pb-28"
       >
         <Chip>Featured Projects</Chip>
         <div className="mb-9 flex items-baseline justify-between">
           <div>
-            <h2 className="mt-5 text-5xl font-medium tracking-tight text-text-main md:text-4xl">
+            <h2 className="mt-5 text-3xl font-medium tracking-tight text-text-main sm:text-4xl lg:text-5xl">
               주요 프로젝트
             </h2>
           </div>
@@ -153,9 +153,12 @@ export default function HomePage() {
               key={project.id}
               title={project.title}
               category={project.category?.name ?? "미분류"}
-              year={new Date(project.created_at).getFullYear().toString()}
+              year={project.year ?? undefined}
+              location={project.location ?? undefined}
+              area={project.area ?? undefined}
               image={project.thumbnail}
               summary={project.description}
+              to={`/works/${project.id}`}
             />
           ))}
         </div>
@@ -177,12 +180,12 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ amount: 0.15 }}
         transition={{ duration: 0.55, ease: "easeOut" }}
-        className="mx-auto w-full max-w-310 px-6 pb-32"
+        className="mx-auto w-full max-w-310 px-4 pb-20 sm:px-6 md:pb-32"
       >
         <div className="grid gap-10 lg:grid-cols-[0.47fr_0.53fr]">
           <div className="pt-4">
             <Chip>Get In Touch</Chip>
-            <h2 className="mt-6 text-5xl font-medium tracking-tight text-text-main md:text-4xl">
+            <h2 className="mt-6 text-3xl font-medium tracking-tight text-text-main sm:text-4xl lg:text-5xl">
               인테리어 문의
             </h2>
             <p className="mt-6 max-w-117.5 text-base leading-relaxed text-text-muted">
@@ -230,32 +233,6 @@ export default function HomePage() {
               {errors.phone ? (
                 <p className="text-xs text-red-600">{errors.phone.message}</p>
               ) : null}
-
-              <div>
-                <FieldLabel required>비밀번호</FieldLabel>
-                <TextInput
-                  value={watch("password")}
-                  onValueChange={(value) =>
-                    setValue("password", value, {
-                      shouldDirty: true,
-                      shouldTouch: true,
-                      shouldValidate: true,
-                    })
-                  }
-                  type="password"
-                  placeholder="글 조회 시 필요한 비밀번호입니다."
-                  className="mt-4 h-11 px-4"
-                  maxLength={50}
-                />
-                {errors.password ? (
-                  <p className="mt-2 text-xs text-red-600">
-                    {errors.password.message}
-                  </p>
-                ) : null}
-                <p className="mt-2 text-xs text-text-muted">
-                  문의 내용 확인 시 필요합니다.
-                </p>
-              </div>
 
               <div>
                 <p className="text-xs font-medium text-text-main">연령대</p>
@@ -337,8 +314,53 @@ export default function HomePage() {
               <TextInput
                 {...register("moveInDate")}
                 type="date"
-                className=" h-11 px-4"
+                className="h-11 px-4"
               />
+
+              <FieldLabel>공사 시작 희망일</FieldLabel>
+              <TextInput
+                {...register("constructionStartDate")}
+                type="date"
+                className="h-11 px-4"
+              />
+
+              <FieldLabel>희망예산</FieldLabel>
+              <TextInput
+                {...register("desiredBudget")}
+                placeholder="예: 5000만원~7000만원"
+                className="h-11 px-4"
+              />
+
+              <div>
+                <p className="text-xs font-medium text-text-main">알게 된 경로</p>
+                <div className="mt-2 flex flex-wrap gap-5 text-sm text-text-main">
+                  <RadioOption
+                    checked={watch("referralSource") === "blog"}
+                    name="home-referral-source"
+                    onChange={() => setValue("referralSource", "blog", { shouldDirty: true })}
+                    label="블로그"
+                  />
+                  <RadioOption
+                    checked={watch("referralSource") === "youtube"}
+                    name="home-referral-source"
+                    onChange={() => setValue("referralSource", "youtube", { shouldDirty: true })}
+                    label="유튜브"
+                  />
+                  <RadioOption
+                    checked={watch("referralSource") === "other"}
+                    name="home-referral-source"
+                    onChange={() => setValue("referralSource", "other", { shouldDirty: true })}
+                    label="기타"
+                  />
+                </div>
+                {watch("referralSource") === "other" ? (
+                  <TextInput
+                    {...register("referralSourceOther")}
+                    placeholder="알게 된 경로를 입력해주세요."
+                    className="mt-3 h-11 px-4"
+                  />
+                ) : null}
+              </div>
 
               <FieldLabel>원하는 공사</FieldLabel>
               <TextArea

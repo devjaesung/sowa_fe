@@ -2,11 +2,7 @@ import { useMemo } from "react";
 import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { sowaApi } from "../api/sowaApi";
-import type { RoleEnum } from "../api/types";
-import Chip from "../components/ui/Chip";
 import Skeleton from "../components/ui/Skeleton";
-
-const TEAM_ROLE_ORDER: RoleEnum[] = ["manager", "assistant", "staff"];
 
 export default function StoryPage() {
   const historyQuery = useQuery({
@@ -29,40 +25,21 @@ export default function StoryPage() {
     [members],
   );
 
-  const teamGroups = useMemo(() => {
-    return TEAM_ROLE_ORDER.map((role) => ({
-      role,
-      members: members.filter((m) => m.role === role),
-    })).filter((group) => group.members.length > 0);
-  }, [members]);
+  const teamMembers = useMemo(
+    () => members.filter((member) => member.role !== "director"),
+    [members],
+  );
 
   return (
     <>
-      {/* Hero */}
-      <motion.section
-        initial={{ opacity: 0, y: 28 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ amount: 0.15 }}
-        transition={{ duration: 0.55, ease: "easeOut" }}
-        className="mx-auto w-full max-w-310 px-6 pb-20 pt-20"
-      >
-        <Chip>Our Story</Chip>
-        <h1 className="mt-6 text-5xl font-medium tracking-tight text-text-main md:text-4xl">
-          SOWA의 이야기
-        </h1>
-        <p className="mt-6 max-w-2xl text-base leading-relaxed text-text-muted">
-          감각적인 공간을 만드는 사람들. SOWA는 공간을 통해 삶의 방식을
-          제안합니다. 설립부터 현재까지, 저희의 발자취를 소개합니다.
-        </p>
-      </motion.section>
-
+      <h1 className="sr-only">STORY</h1>
       {/* History */}
       <motion.section
         initial={{ opacity: 0, y: 28 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ amount: 0.15 }}
         transition={{ duration: 0.55, ease: "easeOut" }}
-        className="mx-auto w-full max-w-310 px-6 pb-28"
+        className="mx-auto w-full max-w-310 px-4 pb-20 pt-12 sm:px-6 md:pb-28 md:pt-16"
       >
         <h2 className="mb-10 text-3xl font-medium tracking-tight text-text-main">
           주요 연혁
@@ -122,9 +99,9 @@ export default function StoryPage() {
             주요 인물 약력
           </h2>
 
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 md:gap-8">
             {membersQuery.isLoading
-              ? Array.from({ length: 3 }, (_, i) => (
+              ? Array.from({ length: 2 }, (_, i) => (
                   <div
                     key={i}
                     className="space-y-4 rounded-2xl border border-line bg-card p-7 shadow-sm"
@@ -189,7 +166,7 @@ export default function StoryPage() {
       )}
 
       {/* Team */}
-      {(membersQuery.isLoading || teamGroups.length > 0) && (
+      {(membersQuery.isLoading || teamMembers.length > 0) && (
         <motion.section
           initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -215,27 +192,15 @@ export default function StoryPage() {
               ))}
             </div>
           ) : (
-            <div className="space-y-10">
-              {teamGroups.map((group) => (
-                <div key={group.role}>
-                  <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-text-subtle">
-                    {group.members[0]?.role_display}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+              {teamMembers.map((member) => (
+                <div
+                  key={member.id}
+                  className="rounded-xl border border-line bg-card px-5 py-4"
+                >
+                  <p className="text-base font-semibold text-text-main">
+                    {member.name}
                   </p>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                    {group.members.map((m) => (
-                      <div
-                        key={m.id}
-                        className="rounded-xl border border-line bg-card px-5 py-4"
-                      >
-                        <p className="text-base font-semibold text-text-main">
-                          {m.name}
-                        </p>
-                        {m.title && (
-                          <p className="mt-0.5 text-xs text-text-subtle">{m.title}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
                 </div>
               ))}
             </div>
