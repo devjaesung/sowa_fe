@@ -37,12 +37,6 @@ export default function PublicLayout() {
     };
   }, [isMobileMenuOpen]);
 
-  const adminSessionQuery = useQuery({
-    queryKey: ["admin-session-check-public-nav"],
-    queryFn: sowaApi.admin.getStats,
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
   const settingsQuery = useQuery({
     queryKey: ["public-settings"],
     queryFn: sowaApi.public.getSettings,
@@ -77,11 +71,6 @@ export default function PublicLayout() {
             <NavLink to="/contact" className={linkClass}>
               CONTACT
             </NavLink>
-            {adminSessionQuery.isSuccess ? (
-              <NavLink to="/admin" className={linkClass}>
-                ADMIN
-              </NavLink>
-            ) : null}
           </nav>
 
           <button
@@ -122,11 +111,6 @@ export default function PublicLayout() {
             <NavLink to="/contact" className={mobileLinkClass} onClick={() => setIsMobileMenuOpen(false)}>
               CONTACT
             </NavLink>
-            {adminSessionQuery.isSuccess ? (
-              <NavLink to="/admin" className={mobileLinkClass} onClick={() => setIsMobileMenuOpen(false)}>
-                ADMIN
-              </NavLink>
-            ) : null}
           </nav>
         </div>
       ) : null}
